@@ -15,7 +15,11 @@ session_start();
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">Admin Panel</a>
+             <!-- Logo Image -->
+             <a class="navbar-brand d-flex align-items-center" href="index.php">
+                <img src="../assets/images/CODE TO CUISINE.png" alt="Logo" class="logo me-2"> 
+                <span>Admin Panel</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -24,6 +28,8 @@ session_start();
                     <li class="nav-item"><a class="nav-link" href="index.php">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="menu.php">Manage Menu</a></li>
                     <li class="nav-item"><a class="nav-link" href="orders.php">Orders</a></li>
+                    <li class="nav-item"><a class="nav-link" href="orders.php">Orders List</a></li>
+                    <li class="nav-item"><a class="nav-link" href="orders.php">Sales tracker</a></li>
                     <li class="nav-item"><a class="nav-link btn btn-danger text-white" href="logout.php">Logout</a></li>
                 </ul>
             </div>
