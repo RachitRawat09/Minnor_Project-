@@ -30,7 +30,16 @@ session_start();
                     <li class="nav-item"><a class="nav-link" href="orders.php">Orders</a></li>
                     <li class="nav-item"><a class="nav-link" href="orders.php">Orders List</a></li>
                     <li class="nav-item"><a class="nav-link" href="orders.php">Sales tracker</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-danger text-white" href="logout.php">Logout</a></li>
+                    <?php if (isset($_SESSION['user_id'])) { ?>
+                    <li class="nav-item">
+                        <a class="btn btn-danger ms-2" href="logout.php">Logout</a>
+                    </li>
+                <?php } else { ?>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="login.php">Login</a>
+                        <a class="btn btn-secondary ms-2" href="signup.php">Sign Up</a>
+                    </li>
+                <?php } ?>
                 </ul>
             </div>
         </div>

@@ -3,7 +3,7 @@
 $host = "localhost";   // Server (Keep 'localhost' for local development)
 $username = "root";    // Default username for XAMPP/MAMP/WAMP
 $password = "";        // Leave empty if no password is set
-$database = "restaurant_menu";  // Change this to your database name
+$database = "code_to_cuisine";  // Change this to your database name
 $port=3307;
 // Create a connection
 $conn = new mysqli($host, $username, $password, $database,$port);

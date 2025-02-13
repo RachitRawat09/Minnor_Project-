@@ -1,96 +1,136 @@
-<?php
-session_start();
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - CodeToCuisine</title>
-    <!-- Bootstrap CSS -->
+    
+    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
     <style>
         body {
-            background-color: #f8f9fa;
-        }
-        .signup-container {
-            max-width: 450px;
-            margin-top: 50px;
-        }
-        .or-divider {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff00ff, #6100ff);
+            height: 100vh;
             display: flex;
+            justify-content: center;
             align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .left {
+            background: linear-gradient(135deg, #25007a, #8f00ff);
+            color: white;
+            padding: 0;
             text-align: center;
-            margin: 20px 0;
         }
-        .or-divider::before,
-        .or-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #ced4da;
+        .left img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .or-divider span {
-            padding: 0 10px;
-            color: #6c757d;
-            font-size: 14px;
+       
+        .right {
+            padding: 40px;
+        }
+        .input-group input {
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #ff00ff, #6100ff);
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+        }
+        .google-btn {
+            background: #DB4437;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            display: block;
+            width: 100%;
         }
     </style>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
+
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 signup-container">
-                <div class="card shadow-lg">
-                    <div class="card-body p-5">
-                        <h2 class="card-title text-center mb-4">Sign Up</h2>
-                        <form action="process_signup.php" method="POST">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" name="name" placeholder="Your name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" name="email" placeholder="name@example.com" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="text" class="form-control" name="phone" placeholder="Enter Phone Number" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="restaurant" class="form-label">Restaurant Name</label>
-                                <input type="text" class="form-control" name="restaurant" placeholder="Your Restaurant Name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Select Role</label>
-                                <select class="form-control" name="role" required>
-                                    <option value="admin">Restaurant Manager</option>
-                                    
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" name="password" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="confirm-password" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" name="confirm_password" required>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Sign Up</button>
-                            </div>
-                        </form>
-                        
-                        
-                        <div class="text-center mt-3">
-                            Already have an account? <a href="login.php" class="text-decoration-none">Log in</a>
-                        </div>
+        <div class="row">
+            <!-- Left Section -->
+            <div class="col-md-5 d-flex align-items-center justify-content-center left">
+                <img class="img-fluid" src="../assets/images/CODE TO CUISINE.png" alt="Sign up here">
+            </div>
+            
+            <!-- Right Section -->
+            <div class="col-md-7 right">
+                <h2 class="text-center">Sign Up</h2>
+                
+                <!-- Signup Form -->
+                <form action="process_signup.php" method="POST">
+                    <div class="mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Email Address" required>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-custom mt-3">CONTINUE</button>
+                </form>
+                
+                <div class="text-center mt-3">OR</div>
+
+                <a href="google_login.php" class="google-btn mt-3">
+                    <i class="fab fa-google me-2"></i> Sign up with Google
+                </a>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Show SweetAlert Messages -->
+    <?php
+    session_start();
+    if (isset($_SESSION['success'])) {
+        echo "<script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '" . $_SESSION['success'] . "',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        </script>";
+        unset($_SESSION['success']);
+    }
+    if (isset($_SESSION['error'])) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '" . $_SESSION['error'] . "'
+            });
+        </script>";
+        unset($_SESSION['error']);
+    }
+    ?>
+
 </body>
 </html>
