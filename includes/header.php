@@ -27,7 +27,7 @@ session_start();
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="index.php">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="manage_menu.php">Manage Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="orders.php">Orders</a></li>
+                    <li class="nav-item"><a class="nav-link" href="see_orders.php">Orders</a></li>
                     <li class="nav-item"><a class="nav-link" href="orders.php">Orders List</a></li>
                     <li class="nav-item"><a class="nav-link" href="orders.php">Sales tracker</a></li>
                     <?php if (isset($_SESSION['user_id'])) { ?>
