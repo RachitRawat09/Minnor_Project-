@@ -2,7 +2,6 @@
 session_start();
 include '../includes/db_connect.php';
 
-
 // ✅ Handle Quantity Update via AJAX
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_quantity"])) {
     $index = $_POST["index"];
@@ -39,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["remove_item"])) {
     ]);
     exit();
 }
+
 // ✅ Handle Order Confirmation & Save to DB
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     if (!isset($_SESSION["cart"]) || empty($_SESSION["cart"])) {
@@ -48,32 +48,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
 
     // ✅ Get User Inputs from AJAX
     $mobile_number = $_POST["mobile_number"];
-    $table_number = $_POST["table_number"];
+    $table_number = (int)$_POST["table_number"]; // ✅ Typecasting to integer
     $order_type = $_POST["order_type"];
+    $customization = $_POST["customization"] ?? null; // ✅ Handling optional input
 
-    // ✅ Insert Order into DB
-    $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, payment_status, order_status, created_at) VALUES (?, ?, ?, ?, ?, 'Unpaid', 'Pending', NOW())");
-
-
-    $orderDetails = json_encode($_SESSION["cart"]);
+    // ✅ Prepare Order Data
+    $orderDetails = json_encode($_SESSION["cart"], JSON_UNESCAPED_UNICODE);
     $totalPrice = array_sum(array_column($_SESSION["cart"], "total"));
 
-    $stmt->bind_param("sisss", $mobile_number, (int)$table_number, $orderDetails, $totalPrice, $order_type);
+    // ✅ Insert Order into DB
+    $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status,  created_at) 
+                            VALUES (?, ?, ?, ?, ?, ?, 'Unpaid',  NOW())");
 
+    if ($stmt === false) {
+        echo json_encode(["status" => "error", "message" => "Database error: " . $conn->error]);
+        exit();
+    }
+
+    // ✅ Bind parameters correctly
+    $stmt->bind_param("sissss", $mobile_number, $table_number, $orderDetails, $totalPrice, $order_type, $customization);
 
     if ($stmt->execute()) {
         $_SESSION["cart"] = []; // ✅ Clear Cart after Order Placed
         echo json_encode(["status" => "success", "message" => "Order placed successfully!"]);
     } else {
         echo json_encode(["status" => "error", "message" => "Failed to place order. Error: " . $stmt->error]);
-
     }
 
     $stmt->close();
     exit();
 }
-
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -256,30 +264,48 @@ function confirmOrder() {
     let mobileNumber = $("#mobileNumber").val();
     let tableNumber = $("#tableNumber").val();
     let orderType = $("#orderType").val();
+    let customization = $("#customization").val(); // ✅ Get customization input
 
     if (!mobileNumber || !tableNumber || !orderType) {
         Swal.fire("Error", "Please fill all details!", "error");
         return;
     }
 
-    $.post("cart.php", {
-        confirm_order: 1,
-        mobile_number: mobileNumber,
-        table_number: tableNumber,
-        order_type: orderType
-    }, function(response) {
-        let data = JSON.parse(response);
-        if (data.status === "success") {
-            Swal.fire({
-                title: "Order Placed! 🎉",
-                text: "Your order has been successfully placed!",
-                icon: "success",
-                confirmButtonText: "OK"
-            }).then(() => {
-                window.location.href = "bill.php"; // ✅ Redirect after user clicks "OK"
+    Swal.fire({
+        title: "Confirm Order?",
+        text: "Are you sure you want to place this order?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Confirm!",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "cart.php",
+                type: "POST",
+                data: {
+                    confirm_order: 1,
+                    mobile_number: mobileNumber,
+                    table_number: tableNumber,
+                    order_type: orderType,
+                    customization: customization
+                },
+                dataType: "json",
+                success: function(response) {
+                    console.log(response); // ✅ Debugging ke liye
+
+                    if (response.status === "success") {
+                        Swal.fire("Order Placed!", "Your order has been placed successfully!", "success").then(() => {
+                            window.location.href = "index.php"; // ✅ Redirect
+                        });
+                    } else {
+                        Swal.fire("Error", response.message, "error");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText); // ✅ Debugging ke liye error console me dikhayega
+                    Swal.fire("Error", "Something went wrong. Please try again.", "error");
+                }
             });
-        } else {
-            Swal.fire("Error", data.message, "error");
         }
     });
 }
