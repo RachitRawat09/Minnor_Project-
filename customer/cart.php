@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
 
     // ✅ Insert Order into DB
     $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status,  created_at) 
-                            VALUES (?, ?, ?, ?, ?, ?, 'Unpaid',  NOW())");
+                            VALUES (?, ?, ?, ?, ?, ?, 'Pending',  NOW())");
 
     if ($stmt === false) {
         echo json_encode(["status" => "error", "message" => "Database error: " . $conn->error]);
@@ -70,6 +70,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
 
     if ($stmt->execute()) {
         $_SESSION["cart"] = []; // ✅ Clear Cart after Order Placed
+        $_SESSION['last_order_id'] = $conn->insert_id; // ✅ Store the last inserted order ID in session
+
         echo json_encode(["status" => "success", "message" => "Order placed successfully!"]);
     } else {
         echo json_encode(["status" => "error", "message" => "Failed to place order. Error: " . $stmt->error]);
@@ -157,13 +159,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
 <body>
 
 <!-- ✅ Navbar -->
-<nav class="navbar navbar-light bg-white shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
         <a class="navbar-brand fw-bold text-primary">
             <i class="fas fa-utensils"></i> CodeToCuisine
         </a>
-        <a href="index.php" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Back to Menu
+        <a href="index.php" class="btn btn-outline-primary rounded-pill">
+            <i class="fas fa-arrow-left me-2"></i> Back to Menu
         </a>
     </div>
 </nav>
@@ -295,7 +297,7 @@ function confirmOrder() {
 
                     if (response.status === "success") {
                         Swal.fire("Order Placed!", "Your order has been placed successfully!", "success").then(() => {
-                            window.location.href = "index.php"; // ✅ Redirect
+                            window.location.href = "bill.php"; // ✅ Redirect
                         });
                     } else {
                         Swal.fire("Error", response.message, "error");

@@ -11,6 +11,13 @@ include '../includes/db_connect.php';
     <title>Manage Menu - CodeToCuisine</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style> input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            margin: 0; 
+        }</style>
 </head>
 <body>
 
@@ -86,40 +93,16 @@ include '../includes/db_connect.php';
                     <label>Category:</label>
 <select class="form-control" name="category" required>
     <option disabled selected>-- Select Category --</option>
-    <option value="Burgers">Burgers</option>
-    <option value="Chinese Cuisine">Chinese Cuisine</option>
-    <option value="Combo Meals">Combo Meals</option>
-    <option value="Indian Main Course">Indian Main Course</option>
-    <option value="Pasta Delight">Pasta Delight</option>
-    <option value="Pizzas">Pizzas</option>
-    <option value="Raita & Yogurt">Raita & Yogurt</option>
-    <option value="Rice & Biryani">Rice & Biryani</option>
-    <option value="Roti & Breads">Roti & Breads</option>
-    <option value="Salads">Salads</option>
-    <option value="Sandwiches">Sandwiches</option>
-    <option value="Single Topping Pizza">Single Topping Pizza</option>
-    <option value="Double Topping Pizza">Double Topping Pizza</option>
-    <option value="Tandoori Snacks">Tandoori Snacks</option>
-    <option value="Thali">Thali</option>
-    <option value="Wraps & Rolls">Wraps & Rolls</option>
-
-    <option value="Burgers (Non-Veg)">Burgers (Non-Veg)</option>
-    <option value="Chinese Cuisine (Non-Veg)">Chinese Cuisine (Non-Veg)</option>
-    <option value="Combo Meals (Non-Veg)">Combo Meals (Non-Veg)</option>
-    <option value="Indian Main Course (Non-Veg)">Indian Main Course (Non-Veg)</option>
-    <option value="Pasta Delight (Non-Veg)">Pasta Delight (Non-Veg)</option>
-    <option value="Pizzas (Non-Veg)">Pizzas (Non-Veg)</option>
-    <option value="Raita & Yogurt (Non-Veg)">Raita & Yogurt (Non-Veg)</option>
-    <option value="Rice & Biryani (Non-Veg)">Rice & Biryani (Non-Veg)</option>
-    <option value="Roti & Breads (Non-Veg)">Roti & Breads (Non-Veg)</option>
-    <option value="Salads (Non-Veg)">Salads (Non-Veg)</option>
-    <option value="Sandwiches (Non-Veg)">Sandwiches (Non-Veg)</option>
-    <option value="Single Topping Pizza (Non-Veg)">Single Topping Pizza (Non-Veg)</option>
-    <option value="Double Topping Pizza (Non-Veg)">Double Topping Pizza (Non-Veg)</option>
-    <option value="Tandoori Snacks (Non-Veg)">Tandoori Snacks (Non-Veg)</option>
-    <option value="Thali (Non-Veg)">Thali (Non-Veg)</option>
-    <option value="Wraps & Rolls (Non-Veg)">Wraps & Rolls (Non-Veg)</option>
+    <?php
+    $categoryQuery = "SELECT * FROM categories";
+    $categoryResult = $conn->query($categoryQuery);
+    
+    while ($categoryRow = $categoryResult->fetch_assoc()) {
+        echo "<option value='{$categoryRow['category_name']}'>{$categoryRow['category_name']}</option>";
+    }
+    ?>
 </select>
+
 
 
                     <label>Size Type:</label>

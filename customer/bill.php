@@ -1,16 +1,26 @@
 <?php
 session_start();
+include '../includes/db_connect.php';
 
-// ✅ Ensure there's a pending order
-if (!isset($_SESSION["pending_order"])) {
-    die("<script>alert('No pending order found!'); window.location.href='index.php';</script>");
+// ✅ Fetch Last Order
+$query = "SELECT * FROM orders ORDER BY id DESC LIMIT 1";
+$result = $conn->query($query);
+
+if ($result->num_rows > 0) {
+    $order = $result->fetch_assoc();
+    $orderDetails = json_decode($order['order_details'], true);
+} else {
+    die("<h2 class='text-center text-danger'>No Recent Order Found</h2>");
 }
 
-// ✅ Retrieve order details from session
-$orderDetails = $_SESSION["pending_order"]["order_details"];
-$totalPrice = $_SESSION["pending_order"]["total_price"];
-$orderDate = date("d M Y, h:i A");
+// ✅ Tax Calculations
+$subtotal = $order['total_price'];
+$gst = round($subtotal * 0.05, 2); // 5% GST
+$serviceCharge = round($subtotal * 0.10, 2); // 10% Service Charge
+$grandTotal = $subtotal + $gst + $serviceCharge;
 
+// ✅ Payment Status (Always Show Pending Before Payment)
+$paymentStatus = $order['payment_status'] === 'Pending' ? "<span class='badge bg-success'>Paid</span>" : "<span class='badge bg-warning text-dark'>Pending</span>";
 ?>
 
 <!DOCTYPE html>
@@ -18,135 +28,198 @@ $orderDate = date("d M Y, h:i A");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Bill - CodeToCuisine</title>
-
-    <!-- ✅ Bootstrap & SweetAlert -->
+    <title>Bill - CodeToCuisine</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-        .bill-container {
-            max-width: 450px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .bill-header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 22px;
-            color: #007bff;
-            margin-bottom: 15px;
-        }
-        .bill-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-        .bill-footer {
-            font-weight: bold;
-            font-size: 18px;
-            color: #28a745;
-            text-align: right;
-        }
-        .btn-download, .btn-pay {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-download {
-            background: #007bff;
-            color: white;
-            border: none;
-        }
-        .btn-pay {
-            background: #28a745;
-            color: white;
-            border: none;
-        }
+        body { background-color: #f8f9fa; }
+        .navbar-brand { font-size: 1.5rem; }
+        .card { border-radius: 15px; }
+        .table { border-radius: 10px; overflow: hidden; }
+        .btn-lg { border-radius: 30px; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <!-- ✅ Navbar -->
-<nav class="navbar navbar-light bg-white shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
         <a class="navbar-brand fw-bold text-primary">
             <i class="fas fa-utensils"></i> CodeToCuisine
         </a>
-        <a href="index.php" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Back to Menu
+        <a href="index.php" class="btn btn-outline-primary rounded-pill">
+            <i class="fas fa-arrow-left me-2"></i> Back to Menu
         </a>
     </div>
 </nav>
 
-<!-- ✅ Bill Section -->
-<div id="billSection" class="bill-container">
-    <div class="bill-header">CodeToCuisine 🍽</div>
-    <div class="text-center text-muted">Order Date: <?= $orderDate ?></div>
-    <hr>
+<div class="container mt-4">
+    <h2 class="text-center mb-4"><i class="fas fa-receipt me-2"></i>Restaurant Bill</h2>
 
-    <?php foreach ($orderDetails as $item): ?>
-        <div class="bill-item">
-            <span><?= htmlspecialchars($item["name"]) ?> (<?= htmlspecialchars($item["size"]) ?>)</span>
-            <span>₹<?= number_format($item["total"], 2) ?></span>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-4"><i class="fas fa-info-circle me-2"></i>Order Details</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <p class="mb-2"><i class="fas fa-hashtag me-2 text-primary"></i><span class="text-muted">Order ID:</span> <strong><?= $order['id'] ?></strong></p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2"><i class="fas fa-chair me-2 text-primary"></i><span class="text-muted">Table No:</span> <strong><?= $order['table_number'] ?></strong></p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2"><i class="fas fa-mobile-alt me-2 text-primary"></i><span class="text-muted">Mobile No:</span> <strong><?= $order['mobile_number'] ?></strong></p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2"><i class="fas fa-shopping-bag me-2 text-primary"></i><span class="text-muted">Order Type:</span> <strong><?= $order['order_type'] ?></strong></p>
+                </div>
+                <div class="col-12">
+                    <p class="mb-0">
+                        <i class="fas fa-check-circle me-2 text-primary"></i><span class="text-muted">Payment Status:</span> 
+                        <span id="payment-status" class="ms-2 <?= $order['payment_status'] === 'Paid' ? '' : 'animate-pulse' ?>">
+                            <?= $paymentStatus ?>
+                        </span>
+                    </p>
+                    <p><i class="fas fa-credit-card me-2 text-primary"></i>Payment Mode: 
+                        <b id="payment-type"><?= $order['payment_type'] ? $order['payment_type'] : 'Not Selected'; ?></b>
+                    </p>
+                </div>
+            </div>
         </div>
-    <?php endforeach; ?>
+    </div>
 
-    <hr>
-    <div class="bill-footer">Total: ₹<?= number_format($totalPrice, 2) ?></div>
-    
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-4"><i class="fas fa-utensils me-2"></i>Order Items</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Item</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($orderDetails as $item): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($item['name']) ?></td>
+                            <td><?= htmlspecialchars($item['size']) ?></td>
+                            <td><?= htmlspecialchars($item['quantity']) ?></td>
+                            <td>₹<?= htmlspecialchars($item['price']) ?></td>
+                            <td>₹<?= htmlspecialchars($item['total']) ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-4"><i class="fas fa-calculator me-2"></i>Bill Summary</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Subtotal:</strong> ₹<?= number_format($subtotal, 2) ?></p>
+                    <p><strong>GST (5%):</strong> ₹<?= number_format($gst, 2) ?></p>
+                    <p><strong>Service Charge (10%):</strong> ₹<?= number_format($serviceCharge, 2) ?></p>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="text-primary"><strong>Grand Total:</strong> ₹<?= number_format($grandTotal, 2) ?></h4>
+                    <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Note: If Pay with Cash is selected, pay first so that order creation can begin.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ✅ Payment Options -->
-    <button class="btn-pay mt-3" onclick="confirmPayment('Online')">💳 Pay Online</button>
-    <button class="btn-pay mt-2 bg-danger" onclick="confirmPayment('Cash')">💵 Cash on Counter</button>
-    
-    <button class="btn-download mt-3" onclick="downloadBill()">📝 Download Bill (PDF)</button>
+    <?php if ($order['payment_status'] === 'Pending'): ?>
+        <div class="text-center mt-4">
+            <button class="btn btn-success btn-lg me-3 mb-2" onclick="updatePaymentStatus('Cash')">
+                <i class="fas fa-money-bill-wave me-2"></i> Pay with Cash
+            </button>
+            <button class="btn btn-primary btn-lg mb-2" onclick="updatePaymentStatus('Online')">
+                <i class="fas fa-credit-card me-2"></i> Pay Online
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ✅ Print Button (Disabled if payment is pending) -->
+    <button id="printBillBtn" onclick="window.print()" class="btn btn-secondary btn-lg w-100 mt-3" <?= ($order['payment_status'] === 'Pending') ? 'disabled' : '' ?>>
+        <i class="fas fa-print me-2"></i> Print Bill
+    </button>
+
 </div>
 
-<!-- ✅ JavaScript for Storing Order in DB & Downloading Bill -->
 <script>
-function downloadBill() {
-    const bill = document.getElementById("billSection");
-    html2pdf().from(bill).save("CodeToCuisine_Bill.pdf");
-}
-
-function confirmPayment(method) {
+function updatePaymentStatus(method) {
+    let orderId = <?= $order['id'] ?>;
+    
     Swal.fire({
         title: "Confirm Payment?",
-        text: "Proceed with " + method + " payment?",
+        text: `Are you sure you want to pay via ${method}?`,
         icon: "question",
         showCancelButton: true,
-        confirmButtonText: "Yes, Confirm",
-        cancelButtonText: "Cancel"
+        confirmButtonText: "Yes, Confirm!",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+        },
+        buttonsStyling: false
     }).then((result) => {
         if (result.isConfirmed) {
-            // ✅ Send payment method to `process_payment.php`
-            fetch("process_payment.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "payment_method=" + method
+            Swal.fire({
+                title: "Processing Payment",
+                text: "Please wait...",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('update_payment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `order_id=${orderId}&payment_method=${method}`
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === "success") {
-                    Swal.fire("Order Confirmed!", "Thank you for your payment.", "success")
-                    .then(() => {
-                        window.location.href = "index.php"; // ✅ Redirect to homepage after payment
+                if (data.success) {
+                    document.getElementById("payment-status").innerHTML = "<span class='badge bg-success'>Pending</span>";
+                    document.getElementById("payment-status").classList.remove("animate-pulse");
+                    document.getElementById("printBillBtn").disabled = false;
+                    document.getElementById("payment-type").innerText = method;
+                    Swal.fire({
+                        title: "Payment Successful!",
+                        text: "You can now print the bill.",
+                        icon: "success",
+                        confirmButtonText: "OK"
                     });
                 } else {
-                    Swal.fire("Error!", data.message, "error");
+                    Swal.fire({
+                        title: "Error",
+                        text: "Payment update failed.",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
                 }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    title: "Error",
+                    text: "An unexpected error occurred.",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
             });
         }
     });
@@ -155,3 +228,4 @@ function confirmPayment(method) {
 
 </body>
 </html>
+
