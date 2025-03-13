@@ -35,7 +35,7 @@ if (!isset($_SESSION["seen_splash"])) {
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+            background-color:white;
         }
         .menu-card {
             border: none;
@@ -156,13 +156,17 @@ document.addEventListener("DOMContentLoaded", function () {
             </select>
 
             <ul class="navbar-nav d-flex align-items-center gap-4">
-                <li class="nav-item d-flex align-items-center">
-                    <a href="cart.php" class="nav-link fw-bold text-primary px-3 position-relative">
-                        <i class="fas fa-shopping-cart fs-4"></i>
-                        <span class="ms-2">Order</span>
-                        
-                    </a>
-                </li>
+            <li class="nav-item d-flex align-items-center">
+    <a id="order-btn" href="cart.php" class="nav-link fw-bold text-primary px-3 position-relative">
+        <i class="fas fa-shopping-cart fs-4"></i>
+        <span class="ms-2">Order</span>
+        <!-- ✅ This is the red notification badge -->
+        <span id="order-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+            •
+        </span>
+    </a>
+</li>
+
                 <li class="nav-item d-flex align-items-center">
                     <a href="bill.php" class="nav-link fw-bold text-success px-3">
                         <i class="fas fa-receipt fs-4"></i>
@@ -249,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                         <!-- ✅ Add to Cart Button -->
-                        <button type="button" class="btn btn-success add-to-cart btn-cart"
+                        <button type="button" class="btn btn-warning add-to-cart btn-cart"
                             data-id="<?= $item['id']; ?>"
                             data-name="<?= htmlspecialchars($item['name']); ?>"
                             data-image="../uploads/<?= htmlspecialchars($item['image']); ?>"
@@ -259,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             data-price-small="<?= $item['price_small'] ?? 0; ?>"
                             data-price-medium="<?= $item['price_medium'] ?? 0; ?>"
                             data-price-large="<?= $item['price_large'] ?? 0; ?>"
-                            data-price-xl="<?= $item['price_extra_large'] ?? 0; ?>">
+                            data-price-extra-large="<?= $item['price_extra_large'] ?? 0; ?>">
                             <i class="fas fa-cart-plus"></i> Add to Cart
                         </button>
                     </div>
@@ -308,7 +312,9 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
             imageUrl: itemImage,
             imageWidth: 180,
             showCloseButton: true,
+            
             customClass: { popup: '' },
+
             html: `
                 <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13px; text-align: left;">
                     
@@ -371,7 +377,13 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
                 }).then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        Swal.fire("Added!", `Added ${result.value.quantity} × ${itemName}`, "success");
+                        Swal.fire({
+                    title: "Added!",
+                    text: `Added ${result.value.quantity} × ${itemName}`,
+                    icon: "success",
+                    timer: 2000, // ⏳ Auto-close after 2 seconds
+                    timerProgressBar: true
+                });
                     } else {
                         Swal.fire("Error!", "Failed to add item to cart.", "error");
                     }
@@ -385,10 +397,31 @@ document.querySelectorAll(".add-to-cart").forEach(button => {
 });
 
 
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".add-to-cart").forEach(button => {
+        button.addEventListener("click", function () {
+            let itemName = this.dataset.name;
+
+            Swal.fire({
+                title: "Added to Cart!",
+                text: `${itemName} has been added successfully.`,
+                icon: "success"
+            });
+
+            // ✅ Show the Red Badge
+            document.getElementById("order-badge").classList.remove("d-none");
+        });
+    });
+});
+
+
 
 
 
 });
+
+
+
 </script>
 
 </body>

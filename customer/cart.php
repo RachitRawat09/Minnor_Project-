@@ -95,6 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     <!-- ✅ Bootstrap & SweetAlert -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
@@ -274,42 +275,50 @@ function confirmOrder() {
     }
 
     Swal.fire({
-        title: "Confirm Order?",
-        text: "Are you sure you want to place this order?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, Confirm!",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: "cart.php",
-                type: "POST",
-                data: {
-                    confirm_order: 1,
-                    mobile_number: mobileNumber,
-                    table_number: tableNumber,
-                    order_type: orderType,
-                    customization: customization
-                },
-                dataType: "json",
-                success: function(response) {
-                    console.log(response); // ✅ Debugging ke liye
+    title: "Confirm Order?",
+    text: "Are you sure you want to place this order?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Confirm!"
+}).then((result) => {
+    if (result.isConfirmed) {
+        $.ajax({
+            url: "cart.php",
+            type: "POST",
+            data: {
+                confirm_order: 1,
+                mobile_number: mobileNumber,
+                table_number: tableNumber,
+                order_type: orderType,
+                customization: customization
+            },
+            dataType: "json",
+            success: function(response) {
+                console.log(response); // ✅ Debugging ke liye
 
-                    if (response.status === "success") {
-                        Swal.fire("Order Placed!", "Your order has been placed successfully!", "success").then(() => {
-                            window.location.href = "bill.php"; // ✅ Redirect
-                        });
-                    } else {
-                        Swal.fire("Error", response.message, "error");
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText); // ✅ Debugging ke liye error console me dikhayega
-                    Swal.fire("Error", "Something went wrong. Please try again.", "error");
+                if (response.status === "success") {
+                    Swal.fire({
+                        title: "Order Placed!",
+                        text: "Your order has been placed successfully!",
+                        icon: "success",
+                        timer: 2000,  // ✅ Auto-close after 2 seconds
+                        timerProgressBar: true,
+                        showConfirmButton: false // ✅ Hides the "OK" button
+                    }).then(() => {
+                        window.location.href = "bill.php"; // ✅ Redirect
+                    });
+                } else {
+                    Swal.fire("Error", response.message, "error");
                 }
-            });
-        }
-    });
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText); // ✅ Debugging ke liye error console me dikhayega
+                Swal.fire("Error", "Something went wrong. Please try again.", "error");
+            }
+        });
+    }
+});
+
 }
 
 
