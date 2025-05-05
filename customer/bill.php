@@ -70,6 +70,8 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        
+
         body { background-color: #f8f9fa; }
         .navbar-brand { font-size: 1.5rem; }
         .card { border-radius: 15px; }
@@ -88,6 +90,8 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
                 title: 'No Bill Available!',
                 text: 'Place Order First !! ',
                 icon: 'info',
+                timer: 2000,  
+                timerProgressBar: true,
                 confirmButtonText: 'OK'
             }).then(() => {
                 window.location.href = 'index.php'; // ✅ Redirect to Home

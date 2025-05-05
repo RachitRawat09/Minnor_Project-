@@ -31,80 +31,227 @@ if (!isset($_SESSION["seen_splash"])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
 
     <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --accent-color: #ffd166;
+            --text-color: #2d3436;
+            --light-bg: #f8f9fa;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background-color:white;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            padding-top: 80px; /* Add padding to body to account for fixed navbar */
         }
+
+        /* Hero Slider Styles */
+        .hero-slider {
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .hero-slide {
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.3));
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .hero-content {
+            color: white;
+            max-width: 600px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Category Carousel */
+        .category-carousel {
+            margin: 2rem 0;
+            padding: 1rem 0;
+        }
+
+        .category-item {
+            text-align: center;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 15px;
+        }
+
+        .category-item:hover {
+            transform: translateY(-5px);
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .category-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Menu Card Styles */
         .menu-card {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            transition: 0.3s;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
             overflow: hidden;
             background: white;
+            margin-bottom: 2rem;
+            height: 100%;
         }
+
         .menu-card:hover {
-            transform: scale(1.02);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
+
         .menu-card img {
-            height: 180px;
+            height: 200px;
             object-fit: cover;
+            transition: transform 0.3s ease;
         }
-        .category-filter {
-            max-width: 300px;
-            margin: 0 auto 20px;
+
+        .menu-card:hover img {
+            transform: scale(1.1);
         }
+
+        .menu-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .menu-card .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .menu-card .category-badge {
+            background: var(--light-bg);
+            color: var(--text-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .menu-card .price {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
         .btn-cart {
-            width: 100%;
-            font-weight: bold;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
+
+        .btn-cart:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Navbar Styles */
         .navbar {
-            background-color: #fff;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
         }
-        .menu_card{
-            margin-top: 150px;
-            padding: 15px;
-            
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
         }
-        input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    margin: 0; 
-}
 
-/* pop css  */
- /* ✅ Background color for the popup */
- .custom-swal-popup {
-        background-color: #fdd835; /* Yellow background */
-        border-radius: 12px;
-    }
-    
-    /* ✅ Styling for the Enter button */
-    .custom-confirm-button {
-        background-color: #ff5722; /* Orange button */
-        color: white;
-        font-weight: bold;
-        padding: 10px 24px;
-        font-size: 16px;
-        border-radius: 8px;
-    }
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
 
-    /* ✅ Title style */
-    .custom-title {
-        color: #333;
-        font-weight: bold;
-        font-size: 22px;
-    }
-     /* ✅ Keep input field background default (white) */
-     .custom-input-field {
-        background-color: white !important;
-        color: black !important;
-    }
+        .nav-link:hover {
+            background: var(--light-bg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+        .menu-card{
+            margin-top: 1.5rem;
+        }
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 140px; /* Increased padding for mobile to account for additional navbar elements */
+            }
+
+            .hero-slider {
+                height: 300px;
+            }
+
+            .menu-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        /* Menu Container Styles */
+        .menu-container {
+            padding-top: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <!-- ✅ Modern Responsive Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top py-3">
+<nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <div class="container">
         
         <!-- ✅ CodeToCuisine (Always Centered for Small Screens) -->
@@ -220,11 +367,8 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 </nav>
 
-<!-- ✅ Fixing Menu Items Hidden Behind Navbar -->
-<div class=" menu_card container text-center ">
-    
-
-
+<!-- Menu Container -->
+<div class="container menu-container">
     <!-- Menu Items -->
     <div class="row" id="menuItems">
         <?php while ($item = $menu_items->fetch_assoc()) { ?>
@@ -232,11 +376,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="card menu-card">
                     <img src="../uploads/<?= htmlspecialchars($item['image']); ?>" class="card-img-top" alt="<?= htmlspecialchars($item['name']); ?>">
                     <div class="card-body">
+                        <span class="category-badge"><?= htmlspecialchars($item['category']); ?></span>
                         <h5 class="card-title"><?= htmlspecialchars($item['name']); ?></h5>
-                        <p class="text-muted"><?= htmlspecialchars($item['category']); ?></p>
-
-                         <!-- ✅ Fix Pizza Prices -->
-                         <p class="fw-bold">
+                        
+                        <p class="price">
                             <?php 
                             if ($item['size_type'] == 'half_full') { ?>
                                 Half: ₹<?= htmlspecialchars($item['price_half'] ?? 'N/A'); ?> / 
@@ -251,20 +394,18 @@ document.addEventListener("DOMContentLoaded", function () {
                             <?php } ?>
                         </p>
 
-
-                        <!-- ✅ Add to Cart Button -->
-                        <button type="button" class="btn btn-warning add-to-cart btn-cart"
-                            data-id="<?= $item['id']; ?>"
-                            data-name="<?= htmlspecialchars($item['name']); ?>"
-                            data-image="../uploads/<?= htmlspecialchars($item['image']); ?>"
-                            data-size="<?= $item['size_type']; ?>"
-                            data-price-half="<?= $item['price_half'] ?? 0; ?>"
-                            data-price-full="<?= $item['price_full'] ?? 0; ?>"
-                            data-price-small="<?= $item['price_small'] ?? 0; ?>"
-                            data-price-medium="<?= $item['price_medium'] ?? 0; ?>"
-                            data-price-large="<?= $item['price_large'] ?? 0; ?>"
-                            data-price-extra-large="<?= $item['price_extra_large'] ?? 0; ?>">
-                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        <button class="btn btn-cart w-100 add-to-cart" 
+                                data-id="<?= $item['id']; ?>"
+                                data-name="<?= htmlspecialchars($item['name']); ?>"
+                                data-image="../uploads/<?= htmlspecialchars($item['image']); ?>"
+                                data-size="<?= htmlspecialchars($item['size_type']); ?>"
+                                data-price-small="<?= htmlspecialchars($item['price_small'] ?? 'N/A'); ?>"
+                                data-price-medium="<?= htmlspecialchars($item['price_medium'] ?? 'N/A'); ?>"
+                                data-price-large="<?= htmlspecialchars($item['price_large'] ?? 'N/A'); ?>"
+                                data-price-xl="<?= htmlspecialchars($item['price_extra_large'] ?? 'N/A'); ?>"
+                                data-price-half="<?= htmlspecialchars($item['price_half'] ?? 'N/A'); ?>"
+                                data-price-full="<?= htmlspecialchars($item['price_full'] ?? 'N/A'); ?>">
+                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
                         </button>
                     </div>
                 </div>
@@ -272,6 +413,57 @@ document.addEventListener("DOMContentLoaded", function () {
         <?php } ?>
     </div>
 </div> 
+
+<!-- Hero Slider -->
+<div class="container">
+    <div class="swiper hero-slider">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Delicious Pizzas</h1>
+                        <p>Hand-tossed dough, premium toppings, and authentic flavors</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1998&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Juicy Burgers</h1>
+                        <p>Freshly grilled patties with the perfect blend of spices</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2032&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Fresh Pasta</h1>
+                        <p>Handmade pasta with rich, authentic Italian sauces</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1565003529529-af996435a6b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Refreshing Drinks</h1>
+                        <p>Cool and refreshing beverages to complement your meal</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2027&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Sweet Desserts</h1>
+                        <p>Indulge in our delicious selection of desserts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
 
 <!-- ✅ Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -292,131 +484,135 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ✅ Add to Cart Popup & Store in PHP Session
-document.querySelectorAll(".add-to-cart").forEach(button => {
-    button.addEventListener("click", function () {
-        let itemId = this.dataset.id;
-        let itemName = this.dataset.name;
-        let itemImage = this.dataset.image;
-        let sizeType = this.dataset.size;
-
-        // ✅ Get all pizza prices
-        let priceSmall = parseFloat(this.dataset.priceSmall);
-        let priceMedium = parseFloat(this.dataset.priceMedium);
-        let priceLarge = parseFloat(this.dataset.priceLarge);
-        let priceXL = parseFloat(this.dataset.priceXL);
-        let priceFull = parseFloat(this.dataset.priceFull);
-        let priceHalf = parseFloat(this.dataset.priceHalf);
-
-        Swal.fire({
-            title: itemName,
-            imageUrl: itemImage,
-            imageWidth: 180,
-            showCloseButton: true,
-            
-            customClass: { popup: '' },
-
-            html: `
-                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13px; text-align: left;">
-                    
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
-                        <label for="quantity" style="width: 35%;">Quantity:</label>
-                        <input type="number" id="quantity" class="swal2-input" style="width: 60%;" value="1" min="1">
-                    </div>
-
-                    ${sizeType !== "none" ? `
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
-                        <label for="size" style="width: 35%;">Size:</label>
-                        <select id="size" class="swal2-select" style="width: 60%;">
-                            ${sizeType === "half_full" ? `<option value="half">Half - ₹${priceHalf}</option>` : ""}
-                            ${sizeType === "sml_lrg" ? `
-                                <option value="small">Small - ₹${priceSmall}</option>
-                                <option value="medium">Medium - ₹${priceMedium}</option>
-                                <option value="large">Large - ₹${priceLarge}</option>
-                                <option value="xl">XL - ₹${priceXL}</option>
-                            ` : ""}
-                            <option value="full">Full - ₹${priceFull}</option>
-                        </select>
-                    </div>` : ""}
-                </div>
-            `,
-            preConfirm: () => {
-                let quantity = document.getElementById("quantity").value;
-                let sizeElement = document.getElementById("size"); // ✅ Check if size dropdown exists
-                
-                let selectedSize = sizeElement ? sizeElement.value : "full";
-                let selectedPrice = sizeElement ? (
-                    selectedSize === "half" ? priceHalf :
-                    selectedSize === "small" ? priceSmall :
-                    selectedSize === "medium" ? priceMedium :
-                    selectedSize === "large" ? priceLarge :
-                    selectedSize === "xl" ? priceXL :
-                    priceFull
-                ) : priceFull;
-
-                // ✅ Ensure quantity is greater than 0
-                if (quantity < 1) {
-                    Swal.showValidationMessage("Quantity must be at least 1");
-                    return false;
-                }
-
-                return {
-                    itemId,
-                    itemName,
-                    itemImage,
-                    quantity,
-                    selectedSize,
-                    selectedPrice
-                };
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch("add_to_cart.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(result.value)
-                }).then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                    title: "Added!",
-                    text: `Added ${result.value.quantity} × ${itemName}`,
-                    icon: "success",
-                    timer: 2000, // ⏳ Auto-close after 2 seconds
-                    timerProgressBar: true
-                });
-                    } else {
-                        Swal.fire("Error!", "Failed to add item to cart.", "error");
-                    }
-                }).catch(error => {
-                    console.error("Error:", error);
-                    Swal.fire("Error!", "Something went wrong.", "error");
-                });
-            }
-        });
-    });
-});
-
-
-document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".add-to-cart").forEach(button => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function() {
+            let itemId = this.dataset.id;
             let itemName = this.dataset.name;
+            let itemImage = this.dataset.image;
+            let sizeType = this.dataset.size;
+
+            // ✅ Get all pizza prices
+            let priceSmall = parseFloat(this.dataset.priceSmall);
+            let priceMedium = parseFloat(this.dataset.priceMedium);
+            let priceLarge = parseFloat(this.dataset.priceLarge);
+            let priceXL = parseFloat(this.dataset.priceXl);
+            let priceFull = parseFloat(this.dataset.priceFull);
+            let priceHalf = parseFloat(this.dataset.priceHalf);
 
             Swal.fire({
-                title: "Added to Cart!",
-                text: `${itemName} has been added successfully.`,
-                icon: "success"
-            });
+                title: itemName,
+                imageUrl: itemImage,
+                imageWidth: 180,
+                showCloseButton: true,
+                
+                customClass: { popup: '' },
 
-            // ✅ Show the Red Badge
-            document.getElementById("order-badge").classList.remove("d-none");
+                html: `
+                    <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13px; text-align: left;">
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
+                            <label for="quantity" style="width: 35%;">Quantity:</label>
+                            <select id="quantity" class="swal2-select" style="width: 60%;">
+                        ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
+                    </select>
+                        </div>
+
+                        ${sizeType !== "none" ? `
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
+                            <label for="size" style="width: 35%;">Size:</label>
+                            <select id="size" class="swal2-select" style="width: 60%;">
+                                ${sizeType === "half_full" ? `<option value="half">Half - ₹${priceHalf}</option>` : ""}
+                                ${sizeType === "sml_lrg" ? `
+                                    <option value="small">Small - ₹${priceSmall}</option>
+                                    <option value="medium">Medium - ₹${priceMedium}</option>
+                                    <option value="large">Large - ₹${priceLarge}</option>
+                                    <option value="xl">XL - ₹${priceXL}</option>
+                                ` : ""}
+                                <option value="full">Full - ₹${priceFull}</option>
+                            </select>
+                        </div>` : ""}
+                    </div>
+                `,
+                preConfirm: () => {
+                    let quantity = document.getElementById("quantity").value;
+                    let sizeElement = document.getElementById("size"); // ✅ Check if size dropdown exists
+                    
+                    let selectedSize = sizeElement ? sizeElement.value : "full";
+                    let selectedPrice = sizeElement ? (
+                        selectedSize === "half" ? priceHalf :
+                        selectedSize === "small" ? priceSmall :
+                        selectedSize === "medium" ? priceMedium :
+                        selectedSize === "large" ? priceLarge :
+                        selectedSize === "xl" ? priceXL :
+                        priceFull
+                    ) : priceFull;
+
+                    // ✅ Ensure quantity is greater than 0
+                    if (quantity < 1) {
+                        Swal.showValidationMessage("Quantity must be at least 1");
+                        return false;
+                    }
+
+                    return {
+                        itemId,
+                        itemName,
+                        itemImage,
+                        quantity,
+                        selectedSize,
+                        selectedPrice
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("add_to_cart.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(result.value)
+                    }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: "Added!",
+                                text: `Added ${result.value.quantity} × ${itemName}`,
+                                icon: "success",
+                                timer: 2000, // ⏳ Auto-close after 2 seconds
+                                timerProgressBar: true
+                            });
+                            
+                            // ✅ Show the Red Badge
+                            document.getElementById("order-badge").classList.remove("d-none");
+                        } else {
+                            Swal.fire("Error!", "Failed to add item to cart.", "error");
+                        }
+                    }).catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire("Error!", "Something went wrong.", "error");
+                    });
+                }
+            });
         });
     });
-});
 
-
-
-
+    // Initialize Swiper for Hero Slider with enhanced options
+    const heroSwiper = new Swiper('.hero-slider', {
+        loop: true,
+        autoplay: {
+            delay: 2000,
+            disableOnInteraction: false,
+        },
+        effect: 'fade',
+        fadeEffect: {
+            crossFade: true
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
 
 });
 

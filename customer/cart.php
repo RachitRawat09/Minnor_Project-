@@ -51,14 +51,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     $table_number = (int)$_POST["table_number"]; // ✅ Typecasting to integer
     $order_type = $_POST["order_type"];
     $customization = $_POST["customization"] ?? null; // ✅ Handling optional input
+    $payment_type = $_POST["payment_type"] ?? "Not Selected"; // ✅ Capture selected payment method
+
+    // ✅ Set Payment Status Based on Payment Type
+    $payment_status = ($payment_type === "Online") ? "Paid" : "Pending";
 
     // ✅ Prepare Order Data
     $orderDetails = json_encode($_SESSION["cart"], JSON_UNESCAPED_UNICODE);
     $totalPrice = array_sum(array_column($_SESSION["cart"], "total"));
 
     // ✅ Insert Order into DB
-    $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status,  created_at) 
-                            VALUES (?, ?, ?, ?, ?, ?, 'Pending',  NOW())");
+    $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status, payment_type, created_at) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
     if ($stmt === false) {
         echo json_encode(["status" => "error", "message" => "Database error: " . $conn->error]);
@@ -66,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     }
 
     // ✅ Bind parameters correctly
-    $stmt->bind_param("sissss", $mobile_number, $table_number, $orderDetails, $totalPrice, $order_type, $customization);
+    $stmt->bind_param("sissssss", $mobile_number, $table_number, $orderDetails, $totalPrice, $order_type, $customization, $payment_status, $payment_type);
 
     if ($stmt->execute()) {
         $_SESSION["cart"] = []; // ✅ Clear Cart after Order Placed
@@ -198,7 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
         <?php if (!empty($_SESSION["cart"])): ?>
             <?php foreach ($_SESSION["cart"] as $index => $item): ?>
                 <div class="cart-card" data-index="<?= $index ?>">
-                    <img src="<?= htmlspecialchars($item["image"]) ?>" alt="<?= htmlspecialchars($item["name"]) ?>">
+                    <img src="../uploads/<?= htmlspecialchars($item["image"]) ?>" alt="<?= htmlspecialchars($item["name"]) ?>">
                     <div class="cart-item">
                         <h5><?= htmlspecialchars($item["name"]) ?> (<?= htmlspecialchars($item["size"]) ?>)</h5>
                         <p class="text-muted">₹<?= htmlspecialchars($item["price"]) ?> x 
@@ -225,7 +229,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
             <h4 class="text-end mt-3">Total: ₹<span id="totalPrice"><?= array_sum(array_column($_SESSION["cart"], "total")) ?></span></h4>
             <button id="confirmOrderBtn" onclick="confirmOrder()" class="btn btn-success w-100 mt-3">Confirm Order & Generate Bill</button>
         <?php else: ?>
-            <p class="text-center" id="emptyCartMessage">Your cart is empty! 🛒</p>
+            <p class="text-center" id="emptyCartMessage">Add Food items First !! 🛒</p>
         <?php endif; ?>
     </div>
 </div>
@@ -301,9 +305,9 @@ function confirmOrder() {
                         title: "Order Placed!",
                         text: "Your order has been placed successfully!",
                         icon: "success",
-                        timer: 2000,  // ✅ Auto-close after 2 seconds
+                        timer: 2000,
                         timerProgressBar: true,
-                        showConfirmButton: false // ✅ Hides the "OK" button
+                        showConfirmButton: false 
                     }).then(() => {
                         window.location.href = "bill.php"; // ✅ Redirect
                     });
