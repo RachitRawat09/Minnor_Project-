@@ -22,7 +22,7 @@ if (!$order_id) {
 
 try {
     // Get current order status
-    $stmt = $conn->prepare("SELECT id, payment_status, updated_at FROM orders WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, order_status, updated_at FROM orders WHERE id = ?");
     $stmt->bind_param("i", $order_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -32,7 +32,7 @@ try {
             'success' => true,
             'order' => [
                 'id' => $order['id'],
-                'status' => $order['payment_status'],
+                'status' => $order['order_status'],
                 'updated_at' => $order['updated_at']
             ]
         ]);

@@ -2,6 +2,12 @@
 session_start();
 include '../includes/db_connect.php';
 
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 // Get today's orders count
 $today_orders_query = "SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = CURDATE()";
 $today_orders_result = $conn->query($today_orders_query);
@@ -16,6 +22,11 @@ $pending_orders = $pending_orders_result->fetch_assoc()['count'];
 $menu_items_query = "SELECT COUNT(*) as count FROM menu_items";
 $menu_items_result = $conn->query($menu_items_query);
 $menu_items = $menu_items_result->fetch_assoc()['count'];
+
+// Get orders from the last 1 month
+$month_orders_query = "SELECT COUNT(*) as count FROM orders WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)";
+$month_orders_result = $conn->query($month_orders_query);
+$month_orders = $month_orders_result->fetch_assoc()['count'];
 ?>
 
 <!DOCTYPE html>
@@ -132,6 +143,26 @@ $menu_items = $menu_items_result->fetch_assoc()['count'];
             background-color: #1cc88a;
             color: white;
         }
+
+        .status-info {
+            background-color: #36b9cc;
+            color: white;
+        }
+
+        .status-primary {
+            background-color: #4e73df;
+            color: white;
+        }
+
+        .status-success {
+            background-color: #1cc88a;
+            color: white;
+        }
+
+        .status-danger {
+            background-color: #e74a3b;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -139,9 +170,15 @@ $menu_items = $menu_items_result->fetch_assoc()['count'];
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h3 mb-0 text-gray-800">Dashboard</h2>
             <div class="d-flex gap-2">
-                <a href="logout.php" class="btn btn-outline-danger">
-                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                </a>
+                <?php if (isset($_SESSION['user_id'])) { ?>
+                    <a href="logout.php" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                <?php } else { ?>
+                    <a href="login.php" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                <?php } ?>
             </div>
         </div>
 
@@ -153,7 +190,7 @@ $menu_items = $menu_items_result->fetch_assoc()['count'];
                         <div class="row align-items-center">
                             <div class="col">
                                 <h6 class="text-uppercase mb-2">Total Orders</h6>
-                                <h2 class="mb-0"><?= $today_orders ?></h2>
+                                <h2 class="mb-0"><?= $month_orders ?></h2>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-clipboard-list card-icon text-primary"></i>
@@ -253,15 +290,23 @@ $menu_items = $menu_items_result->fetch_assoc()['count'];
                 <div class="recent-orders">
                     <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
                         <h5 class="mb-0">Recent Orders</h5>
-                        <a href="orders.php" class="btn btn-sm btn-primary">View All</a>
+                        <a href="see_orders.php" class="btn btn-sm btn-primary">View All</a>
                     </div>
                     <?php
-                    $recent_orders_query = "SELECT * FROM orders ORDER BY created_at DESC LIMIT 5";
+                    $recent_orders_query = "SELECT * FROM orders WHERE DATE(created_at) = CURDATE() ORDER BY created_at DESC LIMIT 5";
                     $recent_orders_result = $conn->query($recent_orders_query);
                     
                     if ($recent_orders_result->num_rows > 0) {
                         while ($order = $recent_orders_result->fetch_assoc()) {
-                            $status_class = $order['payment_status'] == 'Pending' ? 'status-pending' : 'status-completed';
+                            $orderStatus = $order['order_status'] ?? 'Pending';
+                            $statusInfo = [
+                                'Pending' => ['class' => 'status-pending', 'icon' => 'clock'],
+                                'Processing' => ['class' => 'status-info', 'icon' => 'sync'],
+                                'Preparing' => ['class' => 'status-primary', 'icon' => 'utensils'],
+                                'Ready' => ['class' => 'status-success', 'icon' => 'check-circle'],
+                                'Completed' => ['class' => 'status-success', 'icon' => 'flag-checkered'],
+                                'Cancelled' => ['class' => 'status-danger', 'icon' => 'times-circle']
+                            ][$orderStatus] ?? ['class' => 'status-pending', 'icon' => 'clock'];
                     ?>
                             <div class="order-item">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -273,8 +318,9 @@ $menu_items = $menu_items_result->fetch_assoc()['count'];
                                         </small>
                                     </div>
                                     <div>
-                                        <span class="status-badge <?= $status_class ?>">
-                                            <?= $order['payment_status'] ?>
+                                        <span class="status-badge <?= $statusInfo['class'] ?>">
+                                            <i class="fas fa-<?= $statusInfo['icon'] ?> me-1"></i>
+                                            <?= $orderStatus ?>
                                         </span>
                                         <span class="ms-2 fw-bold">₹<?= number_format($order['total_price'], 2) ?></span>
                                     </div>
@@ -293,5 +339,83 @@ $menu_items = $menu_items_result->fetch_assoc()['count'];
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Real-time Updates Script -->
+    <script>
+        // Function to update dashboard stats
+        function updateDashboardStats() {
+            fetch('get_dashboard_stats.php')
+                .then(response => response.json())
+                .then(data => {
+                    // Update stats cards
+                    document.querySelector('.orders-card h2').textContent = data.month_orders;
+                    document.querySelector('.pending-card h2').textContent = data.pending_orders;
+                    document.querySelector('.menu-card h2').textContent = data.menu_items;
+                    document.querySelector('.today-card h2').textContent = data.today_orders;
+                });
+        }
+
+        // Function to update recent orders
+        function updateRecentOrders() {
+            fetch('get_recent_orders.php')
+                .then(response => response.json())
+                .then(data => {
+                    const recentOrdersContainer = document.querySelector('.recent-orders');
+                    const ordersList = recentOrdersContainer.querySelector('.order-item').parentElement;
+                    
+                    // Clear existing orders
+                    ordersList.innerHTML = '';
+                    
+                    if (data.length > 0) {
+                        data.forEach(order => {
+                            const statusInfo = {
+                                'Pending': { class: 'status-pending', icon: 'clock' },
+                                'Processing': { class: 'status-info', icon: 'sync' },
+                                'Preparing': { class: 'status-primary', icon: 'utensils' },
+                                'Ready': { class: 'status-success', icon: 'check-circle' },
+                                'Completed': { class: 'status-success', icon: 'flag-checkered' },
+                                'Cancelled': { class: 'status-danger', icon: 'times-circle' }
+                            }[order.order_status] || { class: 'status-pending', icon: 'clock' };
+
+                            const orderHTML = `
+                                <div class="order-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">Order #${order.id}</h6>
+                                            <small class="text-muted">
+                                                Table ${order.table_number} • 
+                                                ${new Date(order.created_at).toLocaleTimeString()}
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <span class="status-badge ${statusInfo.class}">
+                                                <i class="fas fa-${statusInfo.icon} me-1"></i>
+                                                ${order.order_status}
+                                            </span>
+                                            <span class="ms-2 fw-bold">₹${parseFloat(order.total_price).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            ordersList.innerHTML += orderHTML;
+                        });
+                    } else {
+                        ordersList.innerHTML = '<div class="p-3 text-center text-muted">No recent orders</div>';
+                    }
+                });
+        }
+
+        // Function to check for new orders
+        function checkNewOrders() {
+            updateDashboardStats();
+            updateRecentOrders();
+        }
+
+        // Check for new orders every 10 seconds
+        setInterval(checkNewOrders, 10000);
+
+        // Initial check
+        checkNewOrders();
+    </script>
 </body>
 </html>

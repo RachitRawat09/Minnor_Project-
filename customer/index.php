@@ -273,6 +273,56 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<!-- Hero Slider -->
+<div class="container mt-3">
+    <div class="swiper hero-slider">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Delicious Pizzas</h1>
+                        <p>Hand-tossed dough, premium toppings, and authentic flavors</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1998&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Juicy Burgers</h1>
+                        <p>Freshly grilled patties with the perfect blend of spices</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2032&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Fresh Pasta</h1>
+                        <p>Handmade pasta with rich, authentic Italian sauces</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://awadh360.com/assets/img/articles/202405070811Summer%20drink.png');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Refreshing Drinks</h1>
+                        <p>Cool and refreshing beverages to complement your meal</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2027&q=80');">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <h1>Sweet Desserts</h1>
+                        <p>Indulge in our delicious selection of desserts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <!-- <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div> -->
+    </div>
+</div>
 
 
 <!-- ✅ Modern Responsive Navbar -->
@@ -414,59 +464,11 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 </div> 
 
-<!-- Hero Slider -->
-<div class="container">
-    <div class="swiper hero-slider">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
-                <div class="hero-overlay">
-                    <div class="hero-content">
-                        <h1>Delicious Pizzas</h1>
-                        <p>Hand-tossed dough, premium toppings, and authentic flavors</p>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1998&q=80');">
-                <div class="hero-overlay">
-                    <div class="hero-content">
-                        <h1>Juicy Burgers</h1>
-                        <p>Freshly grilled patties with the perfect blend of spices</p>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2032&q=80');">
-                <div class="hero-overlay">
-                    <div class="hero-content">
-                        <h1>Fresh Pasta</h1>
-                        <p>Handmade pasta with rich, authentic Italian sauces</p>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1565003529529-af996435a6b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
-                <div class="hero-overlay">
-                    <div class="hero-content">
-                        <h1>Refreshing Drinks</h1>
-                        <p>Cool and refreshing beverages to complement your meal</p>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide hero-slide" style="background-image: url('https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2027&q=80');">
-                <div class="hero-overlay">
-                    <div class="hero-content">
-                        <h1>Sweet Desserts</h1>
-                        <p>Indulge in our delicious selection of desserts</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
-    </div>
-</div>
+
 
 <!-- ✅ Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
     

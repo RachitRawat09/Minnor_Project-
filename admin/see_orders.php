@@ -133,7 +133,7 @@ $orderStatuses = [
     <div id="ordersContainer">
         <?php if ($result->num_rows > 0) { 
             while ($order = $result->fetch_assoc()) { 
-                $orderStatus = $order['payment_status'];
+                $orderStatus = $order['order_status'];
                 $statusInfo = $orderStatuses[$orderStatus] ?? $orderStatuses['Pending'];
         ?>
             <div class="order-card card mb-3" id="order-<?= $order['id']; ?>" data-order-id="<?= $order['id']; ?>">
@@ -193,7 +193,7 @@ $orderStatuses = [
                                 </div>
                                 <div class="col-md-6">
                                     <h6 class="text-muted mb-3">Payment Information</h6>
-                                    <p><strong>Status:</strong> <?= $order['payment_status']; ?></p>
+                                    <p><strong>Status:</strong> <?= $order['order_status']; ?></p>
                                     <p><strong>Type:</strong> <?= $order['payment_type'] ?? 'Not Specified'; ?></p>
                                     <p><strong>Total:</strong> ₹<?= number_format($order['total_price'], 2); ?></p>
                                 </div>

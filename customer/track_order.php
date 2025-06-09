@@ -248,10 +248,25 @@ $statusInfo = [
 <!-- Real-time Updates Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Store the last known status for each order
+    const lastKnownStatus = {};
+
     // Function to update order status
     function updateOrderStatus(orderId, status) {
         const orderCard = document.getElementById(`order-${orderId}`);
         if (!orderCard) return;
+
+        // Check if status has changed
+        if (lastKnownStatus[orderId] === status) {
+            return; // No change in status
+        }
+
+        // Update last known status
+        lastKnownStatus[orderId] = status;
+
+        // Add a highlight effect to show the update
+        orderCard.classList.add('glow');
+        setTimeout(() => orderCard.classList.remove('glow'), 2000);
 
         // Update status badge
         const statusBadge = orderCard.querySelector('.status-badge');
@@ -267,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         statusBadge.className = `badge bg-${statusInfo.color} status-badge`;
         statusBadge.innerHTML = `<i class="fas fa-${statusInfo.icon} me-1"></i>${status}`;
 
-        // Update progress bar
+        // Update progress bar with animation
         const progressBar = orderCard.querySelector('.progress-bar');
         const statusValue = {
             'Pending': 1,
@@ -277,19 +292,25 @@ document.addEventListener('DOMContentLoaded', function() {
             'Completed': 5,
             'Cancelled': 0
         }[status];
+
+        // Animate progress bar
+        progressBar.style.transition = 'width 0.5s ease-in-out';
         progressBar.style.width = `${(statusValue / 5) * 100}%`;
         progressBar.setAttribute('aria-valuenow', statusValue);
 
-        // Update progress steps
+        // Update progress steps with animation
         const steps = orderCard.querySelectorAll('.progress-step');
         steps.forEach((step, index) => {
             const isCompleted = index < statusValue;
             const isActive = index == statusValue - 1;
+            
+            // Add transition for smooth color change
+            step.style.transition = 'background-color 0.5s ease-in-out';
             step.className = `progress-step rounded-circle ${isCompleted ? 'completed' : (isActive ? 'active' : '')}`;
             step.style.background = isCompleted || isActive ? '' : '#e9ecef';
         });
 
-        // Update status message
+        // Update status message with animation
         const statusMessage = orderCard.querySelector('.alert');
         if (statusMessage) {
             const message = {
@@ -319,12 +340,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Cancelled': 'danger'
             }[status];
 
-            statusMessage.className = `alert alert-${alertClass}`;
-            statusMessage.innerHTML = `<i class="fas fa-${icon} me-2"></i>${message}`;
+            // Add fade effect
+            statusMessage.style.transition = 'opacity 0.5s ease-in-out';
+            statusMessage.style.opacity = '0';
+            
+            setTimeout(() => {
+                statusMessage.className = `alert alert-${alertClass}`;
+                statusMessage.innerHTML = `<i class="fas fa-${icon} me-2"></i>${message}`;
+                statusMessage.style.opacity = '1';
+            }, 500);
+        }
+
+        // Show notification for status change
+        if (status !== 'Pending') {
+            Swal.fire({
+                title: 'Order Status Updated!',
+                text: `Your order #${orderId} is now ${status}`,
+                icon: 'info',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
         }
     }
 
-    // Check for status updates every 10 seconds
+    // Initialize last known status for all orders
+    document.querySelectorAll('[id^="order-"]').forEach(orderCard => {
+        const orderId = orderCard.id.split('-')[1];
+        const statusBadge = orderCard.querySelector('.status-badge');
+        lastKnownStatus[orderId] = statusBadge.textContent.trim();
+    });
+
+    // Check for status updates every 5 seconds
     setInterval(function() {
         const orderIds = Array.from(document.querySelectorAll('[id^="order-"]')).map(el => el.id.split('-')[1]);
         
@@ -344,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error checking order status:', error));
         });
-    }, 10000);
+    }, 5000); // Check every 5 seconds instead of 10
 });
 </script>
 
