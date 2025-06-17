@@ -70,8 +70,6 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        
-
         body { background-color: #f8f9fa; }
         .navbar-brand { font-size: 1.5rem; }
         .card { border-radius: 15px; }
@@ -79,6 +77,134 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
         .btn-lg { border-radius: 30px; }
         .animate-pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Print-specific styles */
+        @media print {
+            /* Hide elements not needed in print */
+            .navbar, .btn, #payment-buttons, .no-print {
+                display: none !important;
+            }
+
+            /* Reset body styles for print */
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            /* Bill container styles */
+            .container {
+                width: 80mm; /* Standard thermal paper width */
+                max-width: 100%;
+                padding: 10px;
+                margin: 0 auto;
+            }
+
+            /* Single box container for all content */
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .card-body {
+                padding: 0 !important;
+            }
+
+            /* Bill header */
+            .bill-header {
+                text-align: center;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed #000;
+            }
+
+            .bill-header h1 {
+                font-size: 24px;
+                margin: 0;
+                font-weight: bold;
+            }
+
+            .bill-header p {
+                margin: 5px 0;
+                font-size: 12px;
+            }
+
+            /* Bill details */
+            .bill-details {
+                margin-bottom: 15px;
+                font-size: 12px;
+            }
+
+            .bill-details p {
+                margin: 3px 0;
+            }
+
+            /* Items table */
+            .table {
+                width: 100%;
+                font-size: 12px;
+                margin-bottom: 15px;
+                border: none !important;
+            }
+
+            .table th {
+                background: none !important;
+                border-bottom: 1px dashed #000 !important;
+                color: #000 !important;
+                font-weight: bold;
+            }
+
+            .table td {
+                border: none !important;
+                padding: 3px 0;
+            }
+
+            /* Bill summary */
+            .bill-summary {
+                border-top: 1px dashed #000;
+                padding-top: 10px;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+
+            .bill-summary p {
+                margin: 3px 0;
+            }
+
+            .grand-total {
+                font-size: 14px;
+                font-weight: bold;
+                margin-top: 10px;
+                border-top: 1px dashed #000;
+                padding-top: 10px;
+            }
+
+            /* Footer */
+            .bill-footer {
+                text-align: center;
+                margin-top: 15px;
+                padding-top: 10px;
+                border-top: 1px dashed #000;
+                font-size: 11px;
+            }
+
+            /* Remove all colors */
+            .text-primary, .text-success, .text-danger, .text-warning, .text-info {
+                color: #000 !important;
+            }
+
+            /* Remove all backgrounds */
+            .bg-primary, .bg-success, .bg-danger, .bg-warning, .bg-info {
+                background: none !important;
+            }
+
+            /* Remove all shadows */
+            .shadow, .shadow-sm {
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -114,11 +240,27 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
 </nav>
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4"><i class="fas fa-receipt me-2"></i>Restaurant Bill</h2>
+    <!-- Print-only bill header -->
+    <div class="bill-header d-none d-print-block">
+        <h1>CodeToCuisine</h1>
+        <p>123 Restaurant Street, Food City</p>
+        <p>Phone: +91 1234567890</p>
+        <p>GSTIN: 12ABCDE1234F1Z5</p>
+    </div>
+
+    <h2 class="text-center mb-4 d-print-none"><i class="fas fa-receipt me-2"></i>Restaurant Bill</h2>
 
     <div class="card shadow mb-4">
         <div class="card-body">
-            <h5 class="card-title mb-4"><i class="fas fa-info-circle me-2"></i>Order Details</h5>
+            <!-- Print-only bill details -->
+            <div class="bill-details d-none d-print-block">
+                <p><strong>Bill No:</strong> <?= $order['id'] ?></p>
+                <p><strong>Date:</strong> <?= date('d/m/Y H:i:s') ?></p>
+                <p><strong>Table No:</strong> <?= $order['table_number'] ?></p>
+                <p><strong>Order Type:</strong> <?= $order['order_type'] ?></p>
+            </div>
+
+            <h5 class="card-title mb-4 d-print-none"><i class="fas fa-info-circle me-2"></i>Order Details</h5>
             <div class="row g-3">
                 <div class="col-md-6">
                     <p class="mb-2"><i class="fas fa-hashtag me-2 text-primary"></i><span class="text-muted">Order ID:</span> <strong><?= $order['id'] ?></strong></p>
@@ -144,12 +286,7 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
                     </p>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-4"><i class="fas fa-utensils me-2"></i>Order Items</h5>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-dark">
@@ -174,42 +311,41 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-4"><i class="fas fa-calculator me-2"></i>Bill Summary</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Subtotal:</strong> ₹<?= number_format($subtotal, 2) ?></p>
-                    <p><strong>GST (5%):</strong> ₹<?= number_format($gst, 2) ?></p>
-                    <p><strong>Service Charge (10%):</strong> ₹<?= number_format($serviceCharge, 2) ?></p>
+            <div class="bill-summary">
+                <p><strong>Subtotal:</strong> ₹<?= number_format($subtotal, 2) ?></p>
+                <p><strong>GST (5%):</strong> ₹<?= number_format($gst, 2) ?></p>
+                <p><strong>Service Charge (10%):</strong> ₹<?= number_format($serviceCharge, 2) ?></p>
+                <div class="grand-total">
+                    <p><strong>Grand Total:</strong> ₹<?= number_format($grandTotal, 2) ?></p>
                 </div>
-                <div class="col-md-6">
-                    <h4 class="text-primary"><strong>Grand Total:</strong> ₹<?= number_format($grandTotal, 2) ?></h4>
-                    <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Note: If Pay with Cash is selected, pay first so that order creation can begin.</p>
-                </div>
+            </div>
+
+            <!-- Print-only bill footer -->
+            <div class="bill-footer d-none d-print-block">
+                <p>Thank you for dining with us!</p>
+                <p>Please visit again</p>
+                <p>This is a computer generated bill</p>
             </div>
         </div>
     </div>
 
-<!-- ✅ Payment Options -->
-<div id="payment-buttons" class="text-center mt-4" <?= ($order['payment_type'] === "Not Selected" || empty($order['payment_type'])) ? '' : 'style="display:none;"' ?>>
-    <button class="btn btn-success btn-lg me-3 mb-2" onclick="updatePaymentStatus('Cash')">
-        <i class="fas fa-money-bill-wave me-2"></i> Pay with Cash
+    <p class="text-danger d-print-none"><i class="fas fa-exclamation-triangle me-2"></i>Note: If Pay with Cash is selected, pay first so that order creation can begin.</p>
+
+    <!-- Payment Options -->
+    <div id="payment-buttons" class="text-center mt-4 no-print" <?= ($order['payment_type'] === "Not Selected" || empty($order['payment_type'])) ? '' : 'style="display:none;"' ?>>
+        <button class="btn btn-success btn-lg me-3 mb-2" onclick="updatePaymentStatus('Cash')">
+            <i class="fas fa-money-bill-wave me-2"></i> Pay with Cash
+        </button>
+        <button class="btn btn-primary btn-lg mb-2" onclick="updatePaymentStatus('Online')">
+            <i class="fas fa-credit-card me-2"></i> Pay Online
+        </button>
+    </div>
+
+    <!-- Print Button -->
+    <button id="printBillBtn" onclick="window.print()" class="btn btn-secondary btn-lg w-100 mt-3 no-print" <?= ($order['payment_type'] !== "Not Selected" && !empty($order['payment_type'])) ? '' : 'disabled' ?>>
+        <i class="fas fa-print me-2"></i> Print Bill
     </button>
-    <button class="btn btn-primary btn-lg mb-2" onclick="updatePaymentStatus('Online')">
-        <i class="fas fa-credit-card me-2"></i> Pay Online
-    </button>
-</div>
-
-<!-- ✅ Print Button (Only Enabled if Payment is Done) -->
-<button id="printBillBtn" onclick="window.print()" class="btn btn-secondary btn-lg w-100 mt-3" <?= ($order['payment_type'] !== "Not Selected" && !empty($order['payment_type'])) ? '' : 'disabled' ?>>
-    <i class="fas fa-print me-2"></i> Print Bill
-</button>
-
-
 </div>
 
 <script>
@@ -257,4 +393,5 @@ function updatePaymentStatus(method) {
 
 </body>
 </html>
+
 

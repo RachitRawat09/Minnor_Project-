@@ -192,7 +192,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
             <label><strong>Order Type:</strong></label>
             <select id="orderType" class="form-control">
                 <option value="Dine In" >Dine In</option>
-                <option value="Takeaway" >Takeaway</option>
             </select>
         </div>
     </div>

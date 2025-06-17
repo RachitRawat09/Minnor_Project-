@@ -35,7 +35,7 @@ if (!isset($_SESSION["seen_splash"])) {
 
     <style>
         :root {
-            --primary-color: #ff6b6b;
+            --primary-color: #FFC72C;  /* Changed to McDonald's yellow */
             --secondary-color: #4ecdc4;
             --accent-color: #ffd166;
             --text-color: #2d3436;
@@ -180,8 +180,8 @@ if (!isset($_SESSION["seen_splash"])) {
         }
 
         .btn-cart {
-            background: var(--primary-color);
-            color: white;
+            background: #FFC72C;  /* Changed to McDonald's yellow */
+            color: var(--text-color);  /* Changed to dark text for better contrast */
             border: none;
             padding: 0.5rem 1.5rem;
             border-radius: 25px;
@@ -190,7 +190,7 @@ if (!isset($_SESSION["seen_splash"])) {
         }
 
         .btn-cart:hover {
-            background: var(--secondary-color);
+            background: #e6b328;  /* Slightly darker yellow for hover state */
             transform: translateY(-2px);
         }
 
@@ -227,7 +227,7 @@ if (!isset($_SESSION["seen_splash"])) {
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
+            background: #FFC72C;  /* Changed to McDonald's yellow */
             border-radius: 4px;
         }
         .menu-card{

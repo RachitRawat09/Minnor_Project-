@@ -121,14 +121,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </select>
 
         <label>Size Type:</label>
-        <select class="form-control" name="size_type" id="size_type">
+        <select class="form-control" name="size_type" id="size_type" onchange="updatePriceFields(this.value)">
             <option value="none" <?= $item['size_type'] == 'none' ? 'selected' : ''; ?>>No Size</option>
             <option value="half_full" <?= $item['size_type'] == 'half_full' ? 'selected' : ''; ?>>Half/Full</option>
             <option value="sml_lrg" <?= $item['size_type'] == 'sml_lrg' ? 'selected' : ''; ?>>Small/Medium/Large/XL</option>
         </select>
 
         <!-- Dynamic Price Fields -->
-        <div id="price_fields"></div>
+        <div id="price_fields" class="mt-3"></div>
 
         <label>Upload New Image (Optional):</label>
         <input type="file" name="image" class="form-control">
@@ -146,18 +146,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- JavaScript to Dynamically Show Correct Price Fields -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    function updatePriceFields(sizeType) {
-        let priceFields = document.getElementById("price_fields");
-        priceFields.innerHTML = "";
+function updatePriceFields(sizeType) {
+    let priceFields = document.getElementById("price_fields");
+    priceFields.innerHTML = "";
 
-        if (sizeType === "half_full") {
-            priceFields.innerHTML = `<label>Half Price:</label><input type="number" name="price_half" class="form-control" value="<?= $item['price_half'] ?? ''; ?>"><label>Full Price:</label><input type="number" name="price_full" class="form-control" value="<?= $item['price_full'] ?? ''; ?>">`;
-        } else if (sizeType === "sml_lrg") {
-            priceFields.innerHTML = `<label>Small Price:</label><input type="number" name="price_small" class="form-control" value="<?= $item['price_small'] ?? ''; ?>"><label>Medium Price:</label><input type="number" name="price_medium" class="form-control" value="<?= $item['price_medium'] ?? ''; ?>"><label>Large Price:</label><input type="number" name="price_large" class="form-control" value="<?= $item['price_large'] ?? ''; ?>"><label>Extra Large Price:</label><input type="number" name="price_extra_large" class="form-control" value="<?= $item['price_extra_large'] ?? ''; ?>">`;
-        }
+    if (sizeType === "half_full") {
+        priceFields.innerHTML = `
+            <div class="mb-3">
+                <label class="form-label">Half Price:</label>
+                <input type="number" name="price_half" class="form-control" value="<?= htmlspecialchars($item['price_half'] ?? '') ?>" step="0.01" min="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Full Price:</label>
+                <input type="number" name="price_full" class="form-control" value="<?= htmlspecialchars($item['price_full'] ?? '') ?>" step="0.01" min="0">
+            </div>`;
+    } else if (sizeType === "sml_lrg") {
+        priceFields.innerHTML = `
+            <div class="mb-3">
+                <label class="form-label">Small Price:</label>
+                <input type="number" name="price_small" class="form-control" value="<?= htmlspecialchars($item['price_small'] ?? '') ?>" step="0.01" min="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Medium Price:</label>
+                <input type="number" name="price_medium" class="form-control" value="<?= htmlspecialchars($item['price_medium'] ?? '') ?>" step="0.01" min="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Large Price:</label>
+                <input type="number" name="price_large" class="form-control" value="<?= htmlspecialchars($item['price_large'] ?? '') ?>" step="0.01" min="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Extra Large Price:</label>
+                <input type="number" name="price_extra_large" class="form-control" value="<?= htmlspecialchars($item['price_extra_large'] ?? '') ?>" step="0.01" min="0">
+            </div>`;
+    } else {
+        priceFields.innerHTML = `
+            <div class="mb-3">
+                <label class="form-label">Price:</label>
+                <input type="number" name="price_full" class="form-control" value="<?= htmlspecialchars($item['price_full'] ?? '') ?>" step="0.01" min="0">
+            </div>`;
     }
-    updatePriceFields("<?= $item['size_type'] ?>");
+}
+
+// Call updatePriceFields when the page loads
+document.addEventListener("DOMContentLoaded", function() {
+    const sizeTypeSelect = document.getElementById("size_type");
+    updatePriceFields(sizeTypeSelect.value);
 });
 </script>
 </body>

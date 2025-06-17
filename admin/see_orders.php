@@ -145,6 +145,11 @@ $orderStatuses = [
                                 <i class="fas fa-<?= $statusInfo['icon']; ?> me-1"></i>
                                 <?= $orderStatus; ?>
                             </span>
+                            <div class="mt-2">
+                                <span class="badge bg-<?= $order['payment_status'] === 'Paid' ? 'success' : 'warning' ?> payment-status-badge">
+                                    <?= $order['payment_status'] ?? 'Pending'; ?>
+                                </span>
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -193,8 +198,23 @@ $orderStatuses = [
                                 </div>
                                 <div class="col-md-6">
                                     <h6 class="text-muted mb-3">Payment Information</h6>
-                                    <p><strong>Status:</strong> <?= $order['order_status']; ?></p>
-                                    <p><strong>Type:</strong> <?= $order['payment_type'] ?? 'Not Specified'; ?></p>
+                                    <p><strong>Status:</strong> 
+                                        <?php 
+                                        $paymentType = $order['payment_type'] ?? 'Not Set';
+                                        $paymentStatus = $order['payment_status'] ?? 'Not Set';
+                                        
+                                        if (strtolower($paymentType) === 'cash on counter' && strtolower($paymentStatus) !== 'paid'): 
+                                        ?>
+                                            <button class="btn btn-sm btn-success" onclick="updatePaymentStatus(<?= $order['id']; ?>)">
+                                                <i class="fas fa-check-circle me-1"></i>Mark as Paid
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="badge bg-<?= strtolower($paymentStatus) === 'paid' ? 'success' : 'warning' ?>">
+                                                <?= $paymentStatus; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </p>
+                                    <p><strong>Type:</strong> <?= $paymentType; ?></p>
                                     <p><strong>Total:</strong> ₹<?= number_format($order['total_price'], 2); ?></p>
                                 </div>
                             </div>
@@ -461,6 +481,81 @@ document.getElementById('notificationBtn').addEventListener('click', function() 
     newOrdersCount = 0;
     updateNotificationBadge();
 });
+
+function updatePaymentStatus(orderId) {
+    Swal.fire({
+        title: 'Update Payment Status',
+        text: 'Are you sure you want to mark this payment as Paid?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Mark as Paid',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Updating...',
+                text: 'Please wait while we update the payment status',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: 'update_payment_status.php',
+                type: 'POST',
+                data: {
+                    order_id: orderId
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Server response:', response); // Debug log
+                    
+                    if (response.success) {
+                        Swal.fire('Updated!', 'Payment status has been updated to Paid.', 'success');
+                        
+                        // Update the payment status in the modal
+                        const paymentStatusElement = document.querySelector(`#orderModal${orderId} .col-md-6 p:first-child`);
+                        if (paymentStatusElement) {
+                            paymentStatusElement.innerHTML = `
+                                <strong>Status:</strong> 
+                                <span class="badge bg-success">Paid</span>
+                            `;
+                        }
+                        
+                        // Update the payment status in the order card
+                        const orderCard = document.querySelector(`#order-${orderId}`);
+                        if (orderCard) {
+                            const paymentStatusBadge = orderCard.querySelector('.payment-status-badge');
+                            if (paymentStatusBadge) {
+                                paymentStatusBadge.className = 'badge bg-success payment-status-badge';
+                                paymentStatusBadge.textContent = 'Paid';
+                            }
+                        }
+                    } else {
+                        Swal.fire('Error!', response.message || 'Failed to update payment status.', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', { xhr, status, error }); // Debug log
+                    let errorMessage = 'Failed to connect to server. Please try again.';
+                    
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMessage = response.message;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                    }
+                    
+                    Swal.fire('Error!', errorMessage, 'error');
+                }
+            });
+        }
+    });
+}
 </script>
 
 </body>
