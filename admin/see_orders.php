@@ -201,7 +201,7 @@ $orderStatuses = [
                                     <p><strong>Status:</strong> 
                                         <?php 
                                         $paymentType = $order['payment_type'] ?? 'Not Set';
-                                        $paymentStatus = $order['payment_status'] ?? 'Not Set';
+                                        $paymentStatus = $order['payment_status'] ?? 'Pending';
                                         
                                         if (strtolower($paymentType) === 'cash on counter' && strtolower($paymentStatus) !== 'paid'): 
                                         ?>
@@ -210,11 +210,11 @@ $orderStatuses = [
                                             </button>
                                         <?php else: ?>
                                             <span class="badge bg-<?= strtolower($paymentStatus) === 'paid' ? 'success' : 'warning' ?>">
-                                                <?= $paymentStatus; ?>
+                                                <?= ucfirst($paymentStatus); ?>
                                             </span>
                                         <?php endif; ?>
                                     </p>
-                                    <p><strong>Type:</strong> <?= $paymentType; ?></p>
+                                    <p><strong>Type:</strong> <?= ucfirst($paymentType); ?></p>
                                     <p><strong>Total:</strong> ₹<?= number_format($order['total_price'], 2); ?></p>
                                 </div>
                             </div>
@@ -510,8 +510,6 @@ function updatePaymentStatus(orderId) {
                 },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('Server response:', response); // Debug log
-                    
                     if (response.success) {
                         Swal.fire('Updated!', 'Payment status has been updated to Paid.', 'success');
                         
@@ -533,12 +531,15 @@ function updatePaymentStatus(orderId) {
                                 paymentStatusBadge.textContent = 'Paid';
                             }
                         }
+
+                        // Refresh the orders list
+                        refreshOrders();
                     } else {
                         Swal.fire('Error!', response.message || 'Failed to update payment status.', 'error');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AJAX error:', { xhr, status, error }); // Debug log
+                    console.error('AJAX error:', { xhr, status, error });
                     let errorMessage = 'Failed to connect to server. Please try again.';
                     
                     try {

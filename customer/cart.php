@@ -53,6 +53,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     $customization = $_POST["customization"] ?? null; // ✅ Handling optional input
     $payment_type = $_POST["payment_type"] ?? "Not Selected"; // ✅ Capture selected payment method
 
+    // ✅ Validate Mobile Number
+    if (!preg_match("/^[0-9]{10}$/", $mobile_number)) {
+        echo json_encode(["status" => "error", "message" => "Please enter a valid 10-digit mobile number."]);
+        exit();
+    }
+
+    // ✅ Validate Table Number
+    if ($table_number < 1 || $table_number > 20) {
+        echo json_encode(["status" => "error", "message" => "Table number must be between 1 and 20."]);
+        exit();
+    }
+
     // ✅ Set Payment Status Based on Payment Type
     $payment_status = ($payment_type === "Online") ? "Paid" : "Pending";
 
@@ -182,16 +194,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
         <h5 class="mb-3">Order Details:</h5>
         <div class="mb-2">
             <label><strong>Table No:</strong></label>
-            <input type="number" id="tableNumber" class="form-control" placeholder="Enter Your Table Number" required>
+            <input type="number" id="tableNumber" class="form-control" placeholder="Enter Your Table Number (1-20)" min="1" max="20" required>
+            <div class="invalid-feedback">Table number must be between 1 and 20.</div>
         </div>
         <div class="mb-2">
             <label><strong>Mobile No:</strong></label>
-            <input type="number" id="mobileNumber" class="form-control" placeholder="Enter Your Mobile Number" required>
+            <input type="tel" id="mobileNumber" class="form-control" placeholder="Enter Your 10-digit Mobile Number" pattern="[0-9]{10}" maxlength="10" required>
+            <div class="invalid-feedback">Please enter a valid 10-digit mobile number.</div>
         </div>
         <div class="mb-2">
             <label><strong>Order Type:</strong></label>
             <select id="orderType" class="form-control">
-                <option value="Dine In" >Dine In</option>
+                <option value="Dine In">Dine In</option>
             </select>
         </div>
     </div>
@@ -266,64 +280,97 @@ function removeItem(index) {
     });
 }
 
-function confirmOrder() {
-    let mobileNumber = $("#mobileNumber").val();
-    let tableNumber = $("#tableNumber").val();
-    let orderType = $("#orderType").val();
-    let customization = $("#customization").val(); // ✅ Get customization input
+// Add input validation functions
+function validateMobileNumber(input) {
+    const mobileRegex = /^[0-9]{10}$/;
+    if (!mobileRegex.test(input.value)) {
+        input.setCustomValidity('Please enter a valid 10-digit mobile number.');
+    } else {
+        input.setCustomValidity('');
+    }
+}
 
-    if (!mobileNumber || !tableNumber || !orderType) {
-        Swal.fire("Error", "Please fill all details!", "error");
+function validateTableNumber(input) {
+    const tableNo = parseInt(input.value);
+    if (tableNo < 1 || tableNo > 20) {
+        input.setCustomValidity('Table number must be between 1 and 20.');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+// Add event listeners for validation
+document.getElementById('mobileNumber').addEventListener('input', function() {
+    validateMobileNumber(this);
+});
+
+document.getElementById('tableNumber').addEventListener('input', function() {
+    validateTableNumber(this);
+});
+
+function confirmOrder() {
+    const mobileNumber = document.getElementById('mobileNumber').value;
+    const tableNumber = document.getElementById('tableNumber').value;
+    const orderType = document.getElementById('orderType').value;
+
+    // Validate inputs before proceeding
+    if (!/^[0-9]{10}$/.test(mobileNumber)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Mobile Number',
+            text: 'Please enter a valid 10-digit mobile number.'
+        });
         return;
     }
 
+    if (tableNumber < 1 || tableNumber > 20) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Table Number',
+            text: 'Table number must be between 1 and 20.'
+        });
+        return;
+    }
+
+    // If validation passes, proceed with order confirmation
     Swal.fire({
-    title: "Confirm Order?",
-    text: "Are you sure you want to place this order?",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Yes, Confirm!"
-}).then((result) => {
-    if (result.isConfirmed) {
-        $.ajax({
-            url: "cart.php",
-            type: "POST",
-            data: {
+        title: 'Confirm Order?',
+        text: "Please verify your details before proceeding.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, place order!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post("cart.php", {
                 confirm_order: 1,
                 mobile_number: mobileNumber,
                 table_number: tableNumber,
-                order_type: orderType,
-                customization: customization
-            },
-            dataType: "json",
-            success: function(response) {
-                console.log(response); // ✅ Debugging ke liye
-
-                if (response.status === "success") {
+                order_type: orderType
+            }, function(response) {
+                let data = JSON.parse(response);
+                if (data.status === "success") {
                     Swal.fire({
-                        title: "Order Placed!",
-                        text: "Your order has been placed successfully!",
-                        icon: "success",
-                        timer: 2000,
-                        timerProgressBar: true,
-                        showConfirmButton: false 
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 2000
                     }).then(() => {
-                        window.location.href = "bill.php"; // ✅ Redirect
+                        window.location.href = 'bill.php';
                     });
                 } else {
-                    Swal.fire("Error", response.message, "error");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message
+                    });
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText); // ✅ Debugging ke liye error console me dikhayega
-                Swal.fire("Error", "Something went wrong. Please try again.", "error");
-            }
-        });
-    }
-});
-
+            });
+        }
+    });
 }
-
 
 </script>
 

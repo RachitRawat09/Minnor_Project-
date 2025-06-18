@@ -217,6 +217,28 @@ if (!isset($_SESSION["seen_splash"])) {
             background: var(--light-bg);
         }
 
+        /* Mobile Navigation Badge Styles */
+        .mobile-nav-link {
+            position: relative;
+            display: inline-block;
+        }
+
+        .mobile-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -383,20 +405,16 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="d-flex d-lg-none w-100 mt-2">
             <a href="#" class="text-primary fs-5 text-center flex-grow-1 p-2 border border-primary">
                 <i class="fas fa-utensils"></i>
-                
             </a>
-            <a href="cart.php" class="text-primary fs-5 text-center flex-grow-1 p-2 border border-primary position-relative">
+            <a href="cart.php" class="text-primary fs-5 text-center flex-grow-1 p-2 border border-primary mobile-nav-link">
                 <i class="fas fa-shopping-cart"></i>
-                
-                
+                <span class="mobile-badge d-none">•</span>
             </a>
             <a href="bill.php" class="text-success fs-5 text-center flex-grow-1 p-2 border border-success">
                 <i class="fas fa-receipt"></i>
-                
             </a>
             <a href="track_order.php" class="text-secondary fs-5 text-center flex-grow-1 p-2 border border-secondary">
                 <i class="fas fa-map-marker-alt"></i>
-                
             </a>
         </div>
 
@@ -474,15 +492,26 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
 document.addEventListener("DOMContentLoaded", function () {
-    // ✅ Category Filter
-    document.getElementById("categoryFilter").addEventListener("change", function () {
-        let selectedCategory = this.value.toLowerCase();
-        let menuItems = document.querySelectorAll(".menu-item");
+    // ✅ Category Filter for both desktop and mobile
+    const categoryFilter = document.getElementById("categoryFilter");
+    const categoryFilterMobile = document.getElementById("categoryFilterMobile");
 
+    function filterMenuItems(selectedCategory) {
+        let menuItems = document.querySelectorAll(".menu-item");
         menuItems.forEach(item => {
             let itemCategory = item.getAttribute("data-category").toLowerCase();
             item.style.display = (selectedCategory === "all" || itemCategory === selectedCategory) ? "block" : "none";
         });
+    }
+
+    // Desktop filter
+    categoryFilter.addEventListener("change", function () {
+        filterMenuItems(this.value.toLowerCase());
+    });
+
+    // Mobile filter
+    categoryFilterMobile.addEventListener("change", function () {
+        filterMenuItems(this.value.toLowerCase());
     });
 
     // ✅ Add to Cart Popup & Store in PHP Session
@@ -581,8 +610,13 @@ document.addEventListener("DOMContentLoaded", function () {
                                 timerProgressBar: true
                             });
                             
-                            // ✅ Show the Red Badge
+                            // ✅ Show the Red Badge for both desktop and mobile
                             document.getElementById("order-badge").classList.remove("d-none");
+                            // Also show badge in mobile view
+                            const mobileBadge = document.querySelector('.mobile-badge');
+                            if (mobileBadge) {
+                                mobileBadge.classList.remove("d-none");
+                            }
                         } else {
                             Swal.fire("Error!", "Failed to add item to cart.", "error");
                         }
