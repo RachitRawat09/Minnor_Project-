@@ -6,20 +6,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $payment_method = $_POST['payment_method'] ?? null;
 
     if (!empty($order_id) && !empty($payment_method)) {
-        // ✅ Determine payment_type & status based on selection
+        // Figure out payment type and status based on what the user picked
         if ($payment_method === 'Online') {
             $payment_type = 'Online';
             $payment_status = 'Paid';  // Online payment is always paid
         } elseif ($payment_method === 'Cash') {
             $payment_type = 'Cash on Counter';
-            $payment_status = 'Pending';  // Cash is collected later, so pending
+            $payment_status = 'Pending';  // If it's cash, payment comes later
         } else {
-            // Fallback for unknown method
+            // If we get here, something went wrong with the payment method
             $payment_type = $payment_method;
             $payment_status = 'Pending';
         }
 
-        // ✅ Update payment_type & payment_status in database
+        // Update the payment type and status in the database
         $updateQuery = "UPDATE orders SET payment_type = ?, payment_status = ? WHERE id = ?";
         $stmt = $conn->prepare($updateQuery);
 

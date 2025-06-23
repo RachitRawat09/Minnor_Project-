@@ -2,7 +2,7 @@
 session_start();
 include '../includes/db_connect.php';
 
-// ✅ Handle Quantity Update via AJAX
+// Handle quantity changes from AJAX
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_quantity"])) {
     $index = $_POST["index"];
     $newQuantity = $_POST["quantity"];
@@ -22,13 +22,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_quantity"])) {
     exit();
 }
 
-// ✅ Handle Item Removal via AJAX
+// Remove an item from the cart using AJAX
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["remove_item"])) {
     $index = $_POST["index"];
 
     if (isset($_SESSION["cart"][$index])) {
         unset($_SESSION["cart"][$index]);
-        $_SESSION["cart"] = array_values($_SESSION["cart"]); // ✅ Re-index array
+        $_SESSION["cart"] = array_values($_SESSION["cart"]); // Re-index the cart array
     }
 
     echo json_encode([
@@ -39,40 +39,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["remove_item"])) {
     exit();
 }
 
-// ✅ Handle Order Confirmation & Save to DB
+// When the user confirms the order, save it to the database
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     if (!isset($_SESSION["cart"]) || empty($_SESSION["cart"])) {
         echo json_encode(["status" => "error", "message" => "Cart is empty."]);
         exit();
     }
 
-    // ✅ Get User Inputs from AJAX
+    // Grab user input from AJAX
     $mobile_number = $_POST["mobile_number"];
-    $table_number = (int)$_POST["table_number"]; // ✅ Typecasting to integer
+    $table_number = (int)$_POST["table_number"]; // Make sure table number is an integer
     $order_type = $_POST["order_type"];
-    $customization = $_POST["customization"] ?? null; // ✅ Handling optional input
-    $payment_type = $_POST["payment_type"] ?? "Not Selected"; // ✅ Capture selected payment method
+    $customization = $_POST["customization"] ?? null; // If there's a note, grab it
+    $payment_type = $_POST["payment_type"] ?? "Not Selected"; // Get the payment method
 
-    // ✅ Validate Mobile Number
+    // Check if the mobile number looks valid
     if (!preg_match("/^[0-9]{10}$/", $mobile_number)) {
         echo json_encode(["status" => "error", "message" => "Please enter a valid 10-digit mobile number."]);
         exit();
     }
 
-    // ✅ Validate Table Number
+    // Check if the table number is valid
     if ($table_number < 1 || $table_number > 20) {
         echo json_encode(["status" => "error", "message" => "Table number must be between 1 and 20."]);
         exit();
     }
 
-    // ✅ Set Payment Status Based on Payment Type
+    // Set payment status based on what the user picked
     $payment_status = ($payment_type === "Online") ? "Paid" : "Pending";
 
-    // ✅ Prepare Order Data
+    // Prepare the order data for the database
     $orderDetails = json_encode($_SESSION["cart"], JSON_UNESCAPED_UNICODE);
     $totalPrice = array_sum(array_column($_SESSION["cart"], "total"));
 
-    // ✅ Insert Order into DB
+    // Insert the order into the database
     $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status, payment_type, created_at) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
@@ -81,12 +81,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
         exit();
     }
 
-    // ✅ Bind parameters correctly
+    // Bind the parameters for the query
     $stmt->bind_param("sissssss", $mobile_number, $table_number, $orderDetails, $totalPrice, $order_type, $customization, $payment_status, $payment_type);
 
     if ($stmt->execute()) {
-        $_SESSION["cart"] = []; // ✅ Clear Cart after Order Placed
-        $_SESSION['last_order_id'] = $conn->insert_id; // ✅ Store the last inserted order ID in session
+        $_SESSION["cart"] = []; // Empty the cart after placing the order
+        $_SESSION['last_order_id'] = $conn->insert_id; // Save the last order ID for later
 
         echo json_encode(["status" => "success", "message" => "Order placed successfully!"]);
     } else {

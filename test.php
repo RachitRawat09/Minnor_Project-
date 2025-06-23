@@ -1,15 +1,15 @@
 <?php
-// Enable error reporting
+// Turning on error reporting for troubleshooting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 echo "<h1>PHP Configuration Test</h1>";
 
-// Test PHP Version
+// Let's check which PHP version is running
 echo "<h2>PHP Version</h2>";
 echo "PHP Version: " . phpversion() . "<br>";
 
-// Test Database Connection
+// Now, let's see if we can connect to the database
 echo "<h2>Database Connection Test</h2>";
 include 'includes/db_connect.php';
 
@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 } else {
     echo "Database Connection Successful!<br>";
     
-    // Test Query
+    // Running a simple query to list tables
     $test_query = "SHOW TABLES";
     $result = $conn->query($test_query);
     
@@ -32,7 +32,7 @@ if ($conn->connect_error) {
     }
 }
 
-// Test File Permissions
+// Let's check if the important folders exist and are writable
 echo "<h2>File Permissions Test</h2>";
 $directories = [
     'admin',
@@ -51,7 +51,7 @@ foreach ($directories as $dir) {
     }
 }
 
-// Test PHP Extensions
+// Checking for required PHP extensions
 echo "<h2>PHP Extensions Test</h2>";
 $required_extensions = [
     'mysqli',
@@ -64,7 +64,7 @@ foreach ($required_extensions as $ext) {
     echo "$ext extension is " . (extension_loaded($ext) ? "loaded" : "not loaded") . "<br>";
 }
 
-// Test Upload Directory
+// Verifying the uploads directory
 echo "<h2>Upload Directory Test</h2>";
 $upload_dir = 'uploads';
 if (is_dir($upload_dir)) {
@@ -74,7 +74,7 @@ if (is_dir($upload_dir)) {
     echo "Upload directory does not exist<br>";
 }
 
-// Test Session
+// Making sure sessions are working
 echo "<h2>Session Test</h2>";
 session_start();
 $_SESSION['test'] = 'working';

@@ -2,12 +2,12 @@
 include '../includes/db_connect.php';
 session_start();
 
-// Get mobile number from session or POST request
+// Grab the user's mobile number from session or POST
 $mobile_number = $_SESSION['mobile_number'] ?? $_POST['mobile_number'] ?? '';
 $orders = [];
 
 if (!empty($mobile_number)) {
-    // Fetch all orders for the mobile number, ordered by latest first
+    // Pull all orders for this number, newest first
     $query = "SELECT * FROM orders 
               WHERE mobile_number = ? 
               ORDER BY created_at DESC";
@@ -18,14 +18,14 @@ if (!empty($mobile_number)) {
     $result = $stmt->get_result();
     
     while ($row = $result->fetch_assoc()) {
-        // Decode the JSON order details
+        // Turn the order details JSON into an array
         $row['order_items'] = json_decode($row['order_details'], true);
         $orders[] = $row;
     }
     $stmt->close();
 }
 
-// Status mapping for progress bar
+// This array helps us show progress for each order
 $orderStatuses = [
     'Pending' => 1,
     'Processing' => 2,
@@ -35,7 +35,7 @@ $orderStatuses = [
     'Cancelled' => 0
 ];
 
-// Status colors and icons
+// Color and icon info for each order status
 $statusInfo = [
     'Pending' => ['color' => 'warning', 'icon' => 'clock'],
     'Processing' => ['color' => 'info', 'icon' => 'sync'],

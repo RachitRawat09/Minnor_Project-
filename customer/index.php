@@ -284,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <?php if ($showSplash): ?>
         Swal.fire({
             title: "Welcome to CodeToCuisine! 🍽",
-            imageUrl: "../assets/images/CODE TO CUISINE.png", // ✅ Replace with actual logo path
+            imageUrl: "../assets/images/CODE TO CUISINE.png", // Use the actual logo here
             imageWidth: 200,
             imageHeight: 200,
             text: "Delicious food at your fingertips!",
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <select id="categoryFilter" class="form-select w-25">
                 <option value="all">All Categories</option>
                 <?php 
-                $categories->data_seek(0); // Reset result set pointer
+                $categories->data_seek(0); // Reset the pointer for the next loop
                 while ($cat = $categories->fetch_assoc()) { ?>
                     <option value="<?= htmlspecialchars($cat['category']); ?>">
                         <?= htmlspecialchars($cat['category']); ?>
@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <select id="categoryFilterMobile" class="form-select">
                 <option value="all">All Categories</option>
                 <?php 
-                $categories->data_seek(0); // Reset result set pointer again for mobile view
+                $categories->data_seek(0); // Reset again for mobile view
                 while ($cat = $categories->fetch_assoc()) { ?>
                     <option value="<?= htmlspecialchars($cat['category']); ?>">
                         <?= htmlspecialchars($cat['category']); ?>
@@ -566,7 +566,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 `,
                 preConfirm: () => {
                     let quantity = document.getElementById("quantity").value;
-                    let sizeElement = document.getElementById("size"); // ✅ Check if size dropdown exists
+                    let sizeElement = document.getElementById("size"); // Only check if the size dropdown is there
                     
                     let selectedSize = sizeElement ? sizeElement.value : "full";
                     let selectedPrice = sizeElement ? (
@@ -606,7 +606,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 title: "Added!",
                                 text: `Added ${result.value.quantity} × ${itemName}`,
                                 icon: "success",
-                                timer: 2000, // ⏳ Auto-close after 2 seconds
+                                timer: 2000, // Auto-close after 2 seconds
                                 timerProgressBar: true
                             });
                             

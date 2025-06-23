@@ -2,7 +2,7 @@
 include '../includes/db_connect.php';
 session_start();
 
-// Check if order_id is provided
+// Make sure we got an order_id from the request
 if (!isset($_POST['order_id'])) {
     echo json_encode(['success' => false, 'message' => 'Order ID is required']);
     exit;
@@ -10,7 +10,7 @@ if (!isset($_POST['order_id'])) {
 
 $order_id = $_POST['order_id'];
 
-// Get the current order status
+// Get the current status for this order
 $query = "SELECT order_status FROM orders WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $order_id);
