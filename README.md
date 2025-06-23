@@ -32,7 +32,7 @@ Built with PHP, MySQL, Bootstrap, and JavaScript.
 
 > _Add screenshots or a GIF here!_
 
-![Customer Menu Screenshot](assets/images/WhatsApp Image 2025-06-18 at 08.38.00_d0c8755e.jpg)
+![Customer Menu Screenshot](assets/images/frame.png)
 <!-- ![Admin Dashboard Screenshot](assets/images/admin_dashboard.png) -->
 
 ---
