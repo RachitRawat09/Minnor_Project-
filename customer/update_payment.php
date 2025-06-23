@@ -9,10 +9,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ✅ Determine payment_type & status based on selection
         if ($payment_method === 'Online') {
             $payment_type = 'Online';
-            $payment_status = 'Paid';  // ✅ Payment is done online
-        } else {
+            $payment_status = 'Paid';  // Online payment is always paid
+        } elseif ($payment_method === 'Cash') {
             $payment_type = 'Cash on Counter';
-            $payment_status = 'Pending';  // ✅ Cash is collected later
+            $payment_status = 'Pending';  // Cash is collected later, so pending
+        } else {
+            // Fallback for unknown method
+            $payment_type = $payment_method;
+            $payment_status = 'Pending';
         }
 
         // ✅ Update payment_type & payment_status in database
