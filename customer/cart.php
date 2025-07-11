@@ -1,6 +1,11 @@
 <?php
 session_start();
 include '../includes/db_connect.php';
+// Require restaurant_id in URL
+if (!isset($_GET['restaurant_id']) || !is_numeric($_GET['restaurant_id'])) {
+    die('<div style="color:red;text-align:center;margin-top:2rem;">Invalid or missing restaurant ID.</div>');
+}
+$restaurant_id = intval($_GET['restaurant_id']);
 
 // Handle quantity changes from AJAX
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_quantity"])) {
@@ -73,8 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     $totalPrice = array_sum(array_column($_SESSION["cart"], "total"));
 
     // Insert the order into the database
-    $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status, payment_type, created_at) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+    $stmt = $conn->prepare("INSERT INTO orders (mobile_number, table_number, order_details, total_price, order_type, customization, payment_status, payment_type, restaurant_id, created_at) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
     if ($stmt === false) {
         echo json_encode(["status" => "error", "message" => "Database error: " . $conn->error]);
@@ -82,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     }
 
     // Bind the parameters for the query
-    $stmt->bind_param("sissssss", $mobile_number, $table_number, $orderDetails, $totalPrice, $order_type, $customization, $payment_status, $payment_type);
+    $stmt->bind_param("sissssssi", $mobile_number, $table_number, $orderDetails, $totalPrice, $order_type, $customization, $payment_status, $payment_type, $restaurant_id);
 
     if ($stmt->execute()) {
         $_SESSION["cart"] = []; // Empty the cart after placing the order
@@ -181,7 +186,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
         <a class="navbar-brand fw-bold text-primary">
             <i class="fas fa-utensils"></i> CodeToCuisine
         </a>
-        <a href="index.php" class="btn btn-outline-primary rounded-pill">
+        <a href="index.php?restaurant_id=<?= $restaurant_id ?>" class="btn btn-outline-primary rounded-pill">
             <i class="fas fa-arrow-left me-2"></i> Back to Menu
         </a>
     </div>
@@ -258,24 +263,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["confirm_order"])) {
     let newQuantity = parseInt(quantityElement.innerText) + change;
     if (newQuantity < 1) return;
 
-    $.post("cart.php", { update_quantity: 1, index: index, quantity: newQuantity }, function(response) {
-        let data = JSON.parse(response);
-        if (data.success) {
-            quantityElement.innerText = data.quantity;
-            totalElement.innerText = data.total.toFixed(2);
-            $("#totalPrice").text(data.grandTotal.toFixed(2));
+    $.post("cart.php?restaurant_id=<?= $restaurant_id ?>", { update_quantity: 1, index: index, quantity: newQuantity }, function(response) {
+        try {
+            let data = JSON.parse(response);
+            if (data.success) {
+                quantityElement.innerText = data.quantity;
+                totalElement.innerText = data.total.toFixed(2);
+                $("#totalPrice").text(data.grandTotal.toFixed(2));
+            }
+        } catch (e) {
+            console.error('Invalid JSON response:', response);
+            Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
         }
     });
 }
 function removeItem(index) {
-    $.post("cart.php", { remove_item: 1, index: index }, function(response) {
-        $(".cart-card[data-index='" + index + "']").remove();
-        let data = JSON.parse(response);
-        $("#totalPrice").text(data.grandTotal.toFixed(2));
+    $.post("cart.php?restaurant_id=<?= $restaurant_id ?>", { remove_item: 1, index: index }, function(response) {
+        try {
+            $(".cart-card[data-index='" + index + "']").remove();
+            let data = JSON.parse(response);
+            $("#totalPrice").text(data.grandTotal.toFixed(2));
 
-        if (data.cartEmpty) {
-            $("#confirmOrderBtn").remove();
-            $("#cartItems").html('<p class="text-center">Your cart is empty! 🛒</p>');
+            if (data.cartEmpty) {
+                $("#confirmOrderBtn").remove();
+                $("#cartItems").html('<p class="text-center">Your cart is empty! 🛒</p>');
+            }
+        } catch (e) {
+            console.error('Invalid JSON response:', response);
+            Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
         }
     });
 }
@@ -312,6 +327,7 @@ function confirmOrder() {
     const mobileNumber = document.getElementById('mobileNumber').value;
     const tableNumber = document.getElementById('tableNumber').value;
     const orderType = document.getElementById('orderType').value;
+    const restaurantId = <?= $restaurant_id ?>;
 
     // Validate inputs before proceeding
     if (!/^[0-9]{10}$/.test(mobileNumber)) {
@@ -343,29 +359,35 @@ function confirmOrder() {
         confirmButtonText: 'Yes, place order!'
     }).then((result) => {
         if (result.isConfirmed) {
-            $.post("cart.php", {
+            $.post("cart.php?restaurant_id=<?= $restaurant_id ?>", {
                 confirm_order: 1,
                 mobile_number: mobileNumber,
                 table_number: tableNumber,
-                order_type: orderType
+                order_type: orderType,
+                restaurant_id: restaurantId
             }, function(response) {
-                let data = JSON.parse(response);
-                if (data.status === "success") {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Order Placed!',
-                        text: data.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    }).then(() => {
-                        window.location.href = 'bill.php';
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message
-                    });
+                try {
+                    let data = JSON.parse(response);
+                    if (data.status === "success") {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Placed!',
+                            text: data.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = 'bill.php?restaurant_id=' + restaurantId;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.message
+                        });
+                    }
+                } catch (e) {
+                    console.error('Invalid JSON response:', response);
+                    Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
                 }
             });
         }

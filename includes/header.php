@@ -1,6 +1,6 @@
-<?php
+<!-- <?php
 session_start();
-?>
+?> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +25,7 @@ session_start();
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="restaurant_dashboard.php">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="manage_menu.php">Manage Menu</a></li>
                     <li class="nav-item"><a class="nav-link" href="see_orders.php">Orders</a></li>
                     <li class="nav-item"><a class="nav-link" href="orders.php">Orders List</a></li>
@@ -41,7 +41,7 @@ session_start();
 
                     <li class="nav-item">
                         <a class="btn btn-primary ms-2" href="login.php">Login</a>
-                        <a class="btn btn-secondary ms-2" href="signup.php">Sign Up</a>
+                        <a class="btn btn-secondary ms-2" href="restaurant_register.php">Sign Up</a>
                     </li>
                 <?php } ?>
                 </ul>

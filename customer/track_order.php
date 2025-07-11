@@ -1,6 +1,11 @@
 <?php
 include '../includes/db_connect.php';
 session_start();
+// Require restaurant_id in URL
+if (!isset($_GET['restaurant_id']) || !is_numeric($_GET['restaurant_id'])) {
+    die('<div style="color:red;text-align:center;margin-top:2rem;">Invalid or missing restaurant ID.</div>');
+}
+$restaurant_id = intval($_GET['restaurant_id']);
 
 // Grab the user's mobile number from session or POST
 $mobile_number = $_SESSION['mobile_number'] ?? $_POST['mobile_number'] ?? '';
@@ -91,10 +96,10 @@ $statusInfo = [
             <i class="fas fa-utensils"></i> CodeToCuisine
         </a>
         <div>
-            <a href="index.php" class="btn btn-outline-primary rounded-pill me-2">
+            <a href="index.php?restaurant_id=<?= $restaurant_id ?>" class="btn btn-outline-primary rounded-pill me-2">
                 <i class="fas fa-arrow-left"></i> Menu
             </a>
-            <a href="cart.php" class="btn btn-outline-success rounded-pill">
+            <a href="cart.php?restaurant_id=<?= $restaurant_id ?>" class="btn btn-outline-success rounded-pill">
                 <i class="fas fa-shopping-cart"></i> Cart
             </a>
         </div>

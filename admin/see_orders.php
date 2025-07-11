@@ -1,9 +1,14 @@
 <?php
 session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+$restaurant_id = $_SESSION['restaurant_id'];
 include '../includes/db_connect.php';
 
 // Fetch Only Today's Orders
-$query = "SELECT * FROM orders WHERE DATE(created_at) = CURDATE() ORDER BY created_at DESC";
+$query = "SELECT * FROM orders WHERE DATE(created_at) = CURDATE() AND restaurant_id = $restaurant_id ORDER BY created_at DESC";
 $result = $conn->query($query);
 
 // Define order statuses
@@ -113,7 +118,7 @@ $orderStatuses = [
                     <span class="notification-badge bg-danger text-white d-none" id="notificationCount">0</span>
                 </button>
             </div>
-            <a href="index.php" class="btn btn-outline-primary rounded-pill">
+            <a href="restaurant_dashboard.php" class="btn btn-outline-primary rounded-pill">
                 <i class="fas fa-arrow-left me-2"></i>Dashboard
             </a>
         </div>

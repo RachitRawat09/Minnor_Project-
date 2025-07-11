@@ -1,13 +1,16 @@
 <?php
 session_start();
 include '../includes/db_connect.php';
-
-// ✅ Fetch categories dynamically
-$category_query = "SELECT DISTINCT category FROM menu_items ORDER BY category ASC";
+// Require restaurant_id in URL
+if (!isset($_GET['restaurant_id']) || !is_numeric($_GET['restaurant_id'])) {
+    die('<div style="color:red;text-align:center;margin-top:2rem;">Invalid or missing restaurant ID.</div>');
+}
+$restaurant_id = intval($_GET['restaurant_id']);
+// Fetch categories for this restaurant
+$category_query = "SELECT DISTINCT c.category_name FROM menu_items mi JOIN categories c ON mi.category = c.id WHERE mi.restaurant_id = $restaurant_id ORDER BY c.category_name ASC";
 $categories = $conn->query($category_query);
-
-// ✅ Fetch all menu items
-$menu_query = "SELECT * FROM menu_items ORDER BY category ASC";
+// Fetch all menu items for this restaurant
+$menu_query = "SELECT mi.*, c.category_name FROM menu_items mi JOIN categories c ON mi.category = c.id WHERE mi.restaurant_id = $restaurant_id ORDER BY c.category_name ASC";
 $menu_items = $conn->query($menu_query);
 
 // ✅ Splash Screen Logic (Show Only Once Per Session)
@@ -368,32 +371,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 <?php 
                 $categories->data_seek(0); // Reset the pointer for the next loop
                 while ($cat = $categories->fetch_assoc()) { ?>
-                    <option value="<?= htmlspecialchars($cat['category']); ?>">
-                        <?= htmlspecialchars($cat['category']); ?>
+                    <option value="<?= htmlspecialchars($cat['category_name']); ?>">
+                        <?= htmlspecialchars($cat['category_name']); ?>
                     </option>
                 <?php } ?>
             </select>
 
             <ul class="navbar-nav d-flex align-items-center gap-4">
             <li class="nav-item d-flex align-items-center">
-    <a id="order-btn" href="cart.php" class="nav-link fw-bold text-primary px-3 position-relative">
+    <a id="order-btn" href="cart.php?restaurant_id=<?= $restaurant_id ?>" class="nav-link fw-bold text-primary px-3 position-relative">
         <i class="fas fa-shopping-cart fs-4"></i>
         <span class="ms-2">Order</span>
-        <!-- ✅ This is the red notification badge -->
-        <span id="order-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
-            •
-        </span>
+        <span id="order-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">•</span>
     </a>
 </li>
 
                 <li class="nav-item d-flex align-items-center">
-                    <a href="bill.php" class="nav-link fw-bold text-success px-3">
+                    <a href="bill.php?restaurant_id=<?= $restaurant_id ?>" class="nav-link fw-bold text-success px-3">
                         <i class="fas fa-receipt fs-4"></i>
                         <span class="ms-2">Bill</span>
                     </a>
                 </li>
                 <li class="nav-item d-flex align-items-center">
-                    <a href="track_order.php" class="nav-link fw-bold text-secondary px-3">
+                    <a href="track_order.php?restaurant_id=<?= $restaurant_id ?>" class="nav-link fw-bold text-secondary px-3">
                         <i class="fas fa-map-marker-alt fs-4"></i>
                         <span class="ms-2">Track Order</span>
                     </a>
@@ -406,14 +406,14 @@ document.addEventListener("DOMContentLoaded", function () {
             <a href="#" class="text-primary fs-5 text-center flex-grow-1 p-2 border border-primary">
                 <i class="fas fa-utensils"></i>
             </a>
-            <a href="cart.php" class="text-primary fs-5 text-center flex-grow-1 p-2 border border-primary mobile-nav-link">
+            <a href="cart.php?restaurant_id=<?= $restaurant_id ?>" class="text-primary fs-5 text-center flex-grow-1 p-2 border border-primary mobile-nav-link">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="mobile-badge d-none">•</span>
             </a>
-            <a href="bill.php" class="text-success fs-5 text-center flex-grow-1 p-2 border border-success">
+            <a href="bill.php?restaurant_id=<?= $restaurant_id ?>" class="text-success fs-5 text-center flex-grow-1 p-2 border border-success">
                 <i class="fas fa-receipt"></i>
             </a>
-            <a href="track_order.php" class="text-secondary fs-5 text-center flex-grow-1 p-2 border border-secondary">
+            <a href="track_order.php?restaurant_id=<?= $restaurant_id ?>" class="text-secondary fs-5 text-center flex-grow-1 p-2 border border-secondary">
                 <i class="fas fa-map-marker-alt"></i>
             </a>
         </div>
@@ -425,8 +425,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 <?php 
                 $categories->data_seek(0); // Reset again for mobile view
                 while ($cat = $categories->fetch_assoc()) { ?>
-                    <option value="<?= htmlspecialchars($cat['category']); ?>">
-                        <?= htmlspecialchars($cat['category']); ?>
+                    <option value="<?= htmlspecialchars($cat['category_name']); ?>">
+                        <?= htmlspecialchars($cat['category_name']); ?>
                     </option>
                 <?php } ?>
             </select>
@@ -435,16 +435,21 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 </nav>
 
+<!-- Expose restaurant_id to JS -->
+<script>
+    const RESTAURANT_ID = <?= json_encode($restaurant_id) ?>;
+</script>
+
 <!-- Menu Container -->
 <div class="container menu-container">
     <!-- Menu Items -->
     <div class="row" id="menuItems">
         <?php while ($item = $menu_items->fetch_assoc()) { ?>
-            <div class="col-md-4 col-sm-6 mb-4 menu-item" data-category="<?= htmlspecialchars($item['category']); ?>">
+            <div class="col-md-4 col-sm-6 mb-4 menu-item" data-category="<?= htmlspecialchars($item['category_name']); ?>">
                 <div class="card menu-card">
                     <img src="../uploads/<?= htmlspecialchars($item['image']); ?>" class="card-img-top" alt="<?= htmlspecialchars($item['name']); ?>">
                     <div class="card-body">
-                        <span class="category-badge"><?= htmlspecialchars($item['category']); ?></span>
+                        <span class="category-badge"><?= htmlspecialchars($item['category_name']); ?></span>
                         <h5 class="card-title"><?= htmlspecialchars($item['name']); ?></h5>
                         
                         <p class="price">
@@ -595,7 +600,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch("add_to_cart.php", {
+                    fetch("add_to_cart.php?restaurant_id=" + RESTAURANT_ID, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(result.value)

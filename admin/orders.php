@@ -1,5 +1,10 @@
 <?php
 session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+$restaurant_id = $_SESSION['restaurant_id'];
 include '../includes/db_connect.php';
 
 // Get filter parameters
@@ -8,9 +13,9 @@ $date_filter = $_GET['date'] ?? date('Y-m-d');
 $search_query = $_GET['search'] ?? '';
 
 // Build the query
-$query = "SELECT * FROM orders WHERE 1=1";
-$params = [];
-$types = "";
+$query = "SELECT * FROM orders WHERE restaurant_id = ?";
+$params = [$restaurant_id];
+$types = "i";
 
 if ($status_filter !== 'all') {
     $query .= " AND order_status = ?";
@@ -112,7 +117,7 @@ $result = $stmt->get_result();
         <a class="navbar-brand fw-bold text-primary">
             <i class="fas fa-utensils"></i> CodeToCuisine Admin
         </a>
-        <a href="index.php" class="btn btn-outline-primary rounded-pill">
+        <a href="restaurant_dashboard.php" class="btn btn-outline-primary rounded-pill">
             <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
         </a>
     </div>

@@ -1,6 +1,11 @@
 <?php
 session_start();
 include '../includes/db_connect.php';
+// Require restaurant_id in URL
+if (!isset($_GET['restaurant_id']) || !is_numeric($_GET['restaurant_id'])) {
+    die('<div style="color:red;text-align:center;margin-top:2rem;">Invalid or missing restaurant ID.</div>');
+}
+$restaurant_id = intval($_GET['restaurant_id']);
 
 $billAvailable = false;
 $order = null;
@@ -220,7 +225,7 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
                 timerProgressBar: true,
                 confirmButtonText: 'OK'
             }).then(() => {
-                window.location.href = 'index.php'; // ✅ Redirect to Home
+                window.location.href="index.php?restaurant_id=<?= $restaurant_id ?>"; // ✅ Redirect to Home
             });
         });
     </script>
@@ -233,7 +238,7 @@ $paymentTypeDisplay = $paymentType === "Not Selected" ? "<span class='badge bg-s
         <a class="navbar-brand fw-bold text-primary">
             <i class="fas fa-utensils"></i> CodeToCuisine
         </a>
-        <a href="index.php" class="btn btn-outline-primary rounded-pill">
+        <a href="index.php?restaurant_id=<?= $restaurant_id ?>" class="btn btn-outline-primary rounded-pill">
             <i class="fas fa-arrow-left me-2"></i> Back to Menu
         </a>
     </div>

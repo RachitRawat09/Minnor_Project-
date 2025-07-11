@@ -73,7 +73,7 @@
             <!-- Right Section -->
             <div class="col-md-6 right">
                 <h3 class="text-center">Login</h3>
-                <p class="text-center">Don't have an account yet? <a href="signup.php">Sign Up</a></p>
+                <p class="text-center">Don't have an account yet? <a href="restaurant_register.php">Register Your Restaurant</a></p>
 
                 <form action="process_login.php" method="POST">
                     <div class="mb-3">

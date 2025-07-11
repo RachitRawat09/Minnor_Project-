@@ -2,12 +2,17 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+$restaurant_id = $_SESSION['restaurant_id'];
 include '../includes/db_connect.php';
 
 // ✅ Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
-    $category = trim($_POST['category']);
+    $category_id = intval($_POST['category_id']);
     $size_type = $_POST['size_type'];
     $availability = $_POST['availability'];
 
@@ -40,8 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ✅ Check if item already exists in the same category
-    $check_stmt = $conn->prepare("SELECT id FROM menu_items WHERE name = ? AND category = ?");
-    $check_stmt->bind_param("ss", $name, $category);
+    $check_stmt = $conn->prepare("SELECT id FROM menu_items WHERE name = ? AND category_id = ? AND restaurant_id = ?");
+    $check_stmt->bind_param("sii", $name, $category_id, $restaurant_id);
     $check_stmt->execute();
     $check_stmt->store_result();
 
@@ -62,10 +67,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // ✅ Insert into database
     $stmt = $conn->prepare("INSERT INTO menu_items 
-        (name, category, image, size_type, price_half, price_full, price_small, price_medium, price_large, price_extra_large, availability) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        (name, category, image, size_type, price_half, price_full, price_small, price_medium, price_large, price_extra_large, availability, restaurant_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    $stmt->bind_param("ssssdddddds", $name, $category, $image, $size_type, $price_half, $price_full, $price_small, $price_medium, $price_large, $price_extra_large, $availability);
+    $stmt->bind_param("sissddddddss", $name, $category_id, $image, $size_type, $price_half, $price_full, $price_small, $price_medium, $price_large, $price_extra_large, $availability, $restaurant_id);
 
     if ($stmt->execute()) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";

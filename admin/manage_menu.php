@@ -1,5 +1,10 @@
 <?php
-// session_start();
+session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+$restaurant_id = $_SESSION['restaurant_id'];
 include '../includes/db_connect.php';
 ?>
 
@@ -35,7 +40,6 @@ include '../includes/db_connect.php';
     <table class="table table-bordered">
         <thead class="table-dark">
             <tr>
-                <th>ID</th>
                 <th>Image</th>
                 <th>Food Name</th>
                 <th>Category</th>
@@ -47,14 +51,13 @@ include '../includes/db_connect.php';
         </thead>
         <tbody>
             <?php
-            $query = "SELECT * FROM menu_items";
+            $query = "SELECT mi.*, c.category_name FROM menu_items mi JOIN categories c ON mi.category = c.id WHERE mi.restaurant_id = $restaurant_id";
             $result = $conn->query($query);
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
-                    <td>{$row['id']}</td>
                     <td><img src='../uploads/{$row['image']}' width='50' height='50' alt='{$row['name']}'></td>
                     <td>{$row['name']}</td>
-                    <td>{$row['category']}</td>
+                    <td>{$row['category_name']}</td>
                     <td>";
                 if ($row['size_type'] == 'half_full') {
                     echo "Half: ₹{$row['price_half']} / Full: ₹{$row['price_full']}";
@@ -92,19 +95,16 @@ include '../includes/db_connect.php';
                     <input type="text" name="name" class="form-control" required>
 
                     <label>Category:</label>
-<select class="form-control" name="category" required>
-    <option disabled selected>-- Select Category --</option>
-    <?php
-    $categoryQuery = "SELECT * FROM categories";
-    $categoryResult = $conn->query($categoryQuery);
-    
-    while ($categoryRow = $categoryResult->fetch_assoc()) {
-        echo "<option value='{$categoryRow['category_name']}'>{$categoryRow['category_name']}</option>";
-    }
-    ?>
-</select>
-
-
+                    <select class="form-control" name="category_id" required>
+                        <option disabled selected>-- Select Category --</option>
+                        <?php
+                        $categoryQuery = "SELECT id, category_name FROM categories WHERE restaurant_id IS NULL";
+                        $categoryResult = $conn->query($categoryQuery);
+                        while ($categoryRow = $categoryResult->fetch_assoc()) {
+                            echo "<option value='{$categoryRow['id']}'>{$categoryRow['category_name']}</option>";
+                        }
+                        ?>
+                    </select>
 
                     <label>Size Type:</label>
                     <select class="form-control" name="size_type" id="size_type">

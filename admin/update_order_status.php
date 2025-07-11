@@ -7,10 +7,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Check if user is admin (using user_id instead of admin_id)
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access. Please login first.']);
     exit;
 }
+
+$restaurant_id = $_SESSION['restaurant_id'];
 
 // Get POST data
 $order_id = $_POST['order_id'] ?? null;
@@ -35,8 +37,8 @@ if (!in_array($status, $valid_statuses)) {
 
 try {
     // First check if order exists
-    $check_stmt = $conn->prepare("SELECT id FROM orders WHERE id = ?");
-    $check_stmt->bind_param("i", $order_id);
+    $check_stmt = $conn->prepare("SELECT id FROM orders WHERE id = ? AND restaurant_id = ?");
+    $check_stmt->bind_param("ii", $order_id, $restaurant_id);
     $check_stmt->execute();
     $check_result = $check_stmt->get_result();
     
@@ -46,14 +48,14 @@ try {
     }
 
     // Update order status
-    $stmt = $conn->prepare("UPDATE orders SET order_status = ?, updated_at = NOW() WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE orders SET order_status = ?, updated_at = NOW() WHERE id = ? AND restaurant_id = ?");
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
         echo json_encode(['success' => false, 'message' => 'Database prepare failed']);
         exit;
     }
     
-    $stmt->bind_param("si", $status, $order_id);
+    $stmt->bind_param("sii", $status, $order_id, $restaurant_id);
     $result = $stmt->execute();
     
     if ($result) {

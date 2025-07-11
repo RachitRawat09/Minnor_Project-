@@ -7,10 +7,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Check if user is admin (using user_id instead of admin_id)
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access. Please login first.']);
     exit;
 }
+
+$restaurant_id = $_SESSION['restaurant_id'];
 
 // Get order ID from POST
 $order_id = $_POST['order_id'] ?? null;
@@ -22,8 +24,8 @@ if (!$order_id) {
 
 try {
     // Get current order status
-    $stmt = $conn->prepare("SELECT id, order_status, updated_at FROM orders WHERE id = ?");
-    $stmt->bind_param("i", $order_id);
+    $stmt = $conn->prepare("SELECT id, order_status, updated_at FROM orders WHERE id = ? AND restaurant_id = ?");
+    $stmt->bind_param("ii", $order_id, $restaurant_id);
     $stmt->execute();
     $result = $stmt->get_result();
     

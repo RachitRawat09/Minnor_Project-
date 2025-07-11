@@ -3,11 +3,13 @@ session_start();
 include '../includes/db_connect.php';
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Not authorized']);
     exit();
 }
+
+$restaurant_id = $_SESSION['restaurant_id'];
 
 // Get POST data
 $data = json_decode(file_get_contents('php://input'), true);
@@ -35,8 +37,7 @@ $description = $conn->real_escape_string($data['description']);
 $date = $conn->real_escape_string($data['date']);
 
 // Insert expense
-$query = "INSERT INTO expenses (category_id, amount, description, date) 
-          VALUES ($category_id, $amount, '$description', '$date')";
+$query = "INSERT INTO expenses (category_id, amount, description, date, restaurant_id) VALUES ($category_id, $amount, '$description', '$date', $restaurant_id)";
 
 if ($conn->query($query)) {
     header('Content-Type: application/json');

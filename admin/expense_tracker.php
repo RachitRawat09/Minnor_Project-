@@ -3,17 +3,19 @@ session_start();
 include '../includes/db_connect.php';
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.php");
     exit();
 }
 
+$restaurant_id = $_SESSION['restaurant_id'];
+
 // Fetch recent completed sales (last 10 completed orders in the last month)
-$sales_query = "SELECT * FROM orders WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND order_status = 'Completed' ORDER BY created_at DESC LIMIT 10";
+$sales_query = "SELECT * FROM orders WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND order_status = 'Completed' AND restaurant_id = $restaurant_id ORDER BY created_at DESC LIMIT 10";
 $sales = $conn->query($sales_query);
 
 // Calculate total completed sales for the last month
-$total_sales_query = "SELECT SUM(total_price) as total FROM orders WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND order_status = 'Completed'";
+$total_sales_query = "SELECT SUM(total_price) as total FROM orders WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) AND order_status = 'Completed' AND restaurant_id = $restaurant_id";
 $total_sales_result = $conn->query($total_sales_query);
 $total_sales = $total_sales_result->fetch_assoc()['total'] ?? 0;
 ?>
@@ -86,7 +88,7 @@ $total_sales = $total_sales_result->fetch_assoc()['total'] ?? 0;
         </a>
         <div class="d-flex align-items-center">
             
-            <a href="index.php" class="btn btn-outline-primary rounded-pill">
+            <a href="restaurant_dashboard.php" class="btn btn-outline-primary rounded-pill">
                 <i class="fas fa-arrow-left me-2"></i>Dashboard
             </a>
         </div>

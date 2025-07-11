@@ -6,6 +6,7 @@ $create_categories_table = "CREATE TABLE IF NOT EXISTS expense_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     description TEXT,
+    restaurant_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
@@ -16,6 +17,7 @@ $create_expenses_table = "CREATE TABLE IF NOT EXISTS expenses (
     amount DECIMAL(10,2) NOT NULL,
     description TEXT NOT NULL,
     date DATE NOT NULL,
+    restaurant_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES expense_categories(id)
 )";

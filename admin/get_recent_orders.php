@@ -1,15 +1,14 @@
 <?php
 session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+$restaurant_id = $_SESSION['restaurant_id'];
 include '../includes/db_connect.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    exit('Unauthorized');
-}
-
 // Get recent orders
-$recent_orders_query = "SELECT * FROM orders WHERE DATE(created_at) = CURDATE() ORDER BY created_at DESC LIMIT 5";
+$recent_orders_query = "SELECT * FROM orders WHERE DATE(created_at) = CURDATE() AND restaurant_id = $restaurant_id ORDER BY created_at DESC LIMIT 5";
 $recent_orders_result = $conn->query($recent_orders_query);
 
 $orders = [];

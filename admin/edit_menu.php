@@ -2,6 +2,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['restaurant_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+$restaurant_id = $_SESSION['restaurant_id'];
 include '../includes/db_connect.php';
 
 // ✅ Ensure `id` is Passed in URL
@@ -14,8 +19,8 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id = $_GET['id'];
 
 // ✅ Fetch Item Details from Database
-$stmt = $conn->prepare("SELECT * FROM menu_items WHERE id = ?");
-$stmt->bind_param("i", $id);
+$stmt = $conn->prepare("SELECT * FROM menu_items WHERE id = ? AND restaurant_id = ?");
+$stmt->bind_param("ii", $id, $restaurant_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $item = $result->fetch_assoc();
@@ -53,8 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ✅ Update the Database with New Data
-    $stmt = $conn->prepare("UPDATE menu_items SET name=?, category=?, image=?, size_type=?, price_half=?, price_full=?, price_small=?, price_medium=?, price_large=?, price_extra_large=?, availability=? WHERE id=?");
-    $stmt->bind_param("ssssddddddsi", $name, $category, $image, $size_type, $price_half, $price_full, $price_small, $price_medium, $price_large, $price_extra_large, $availability, $id);
+    $stmt = $conn->prepare("UPDATE menu_items SET name=?, category=?, image=?, size_type=?, price_half=?, price_full=?, price_small=?, price_medium=?, price_large=?, price_extra_large=?, availability=? WHERE id=? AND restaurant_id=?");
+    $stmt->bind_param("ssssddddddsi", $name, $category, $image, $size_type, $price_half, $price_full, $price_small, $price_medium, $price_large, $price_extra_large, $availability, $id, $restaurant_id);
 
     if ($stmt->execute()) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
