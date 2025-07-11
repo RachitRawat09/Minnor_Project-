@@ -30,12 +30,18 @@ Built with PHP, MySQL, Bootstrap, and JavaScript.
 
 ## 🖥️ Demo
 
-> _Add screenshots or a GIF here!_
+Scan me to see the live preview of project 
 
-![Customer Menu Screenshot](assets/images/CODE%20TO%20CUISINE.png)
+![Customer Menu Screenshot](assets/images/frame.png)
 <!-- ![Admin Dashboard Screenshot](assets/images/admin_dashboard.png) -->
 
 ---
+## work flow 
+
+This is customer side from where you can browse food items and place your order...including detaisl like table number and mobile number.
+Mobile number is required to track your food.You can also download your e-bill ... for paperless work.
+
+These whole data will seen by admin panel...i also have created full fledge admin pannel with the features manage menu, order history, sale tracking system etc.
 
 ## 📦 Installation
 
